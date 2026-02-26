@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>NOVEC Clean-Energy Adoption Explorer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+  <header class="header">
+    <div class="title">
+      <div class="h1">NOVEC Clean-Energy Adoption Explorer</div>
+      <div class="h2">EV + Solar + Charging Infrastructure (aggregated ZIP analytics)</div>
+    </div>
+    <div class="actions">
+      <button id="btnBuild" class="btn">Build/Refresh Metrics</button>
+      <button id="btnExport" class="btn">Export CSV</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <div class="panel-block">
+        <div class="panel-title">Filters</div>
+
+        <label>Technology</label>
+        <select id="tech">
+          <option value="all">All (Score)</option>
+          <option value="ev">EV (EV points/km²)</option>
+          <option value="solar">Solar (customers/km²)</option>
+          <option value="charging">Charging (sites/km²)</option>
+        </select>
+
+        <label>Minimum Score (0–1)</label>
+        <input id="minScore" type="range" min="0" max="1" step="0.05" value="0"/>
+        <div class="small">Current: <span id="minScoreVal">0</span></div>
+
+        <label>Minimum Tech Value (density threshold)</label>
+        <input id="minValue" type="number" min="0" step="0.1" value="0"/>
+
+        <button id="btnApply" class="btn primary">Apply</button>
+      </div>
+
+      <div class="panel-block">
+        <div class="panel-title">Summary</div>
+        <div id="summary" class="kv"></div>
+      </div>
+
+      <div class="panel-block">
+        <div class="panel-title">ZIP Search</div>
+        <input id="zipSearch" placeholder="Enter ZIP (e.g., 22030)"/>
+        <button id="btnSearch" class="btn">Zoom to ZIP</button>
+        <div class="small">Tip: Click a ZIP polygon for details.</div>
+      </div>
+
+      <div class="panel-block">
+        <div class="panel-title">Top ZIPs (by score)</div>
+        <div id="topTable" class="table"></div>
+      </div>
+    </section>
+
+    <section class="map-wrap">
+      <div id="map"></div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
