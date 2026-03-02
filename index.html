@@ -1,179 +1,480 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>NOVEC Predictive Grid - Mockup</title>
-<meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>NOVEC Predictive Grid — Peer Testing Mockup</title>
 
-<style>
-body {
-    margin:0;
-    font-family: Arial, sans-serif;
-    background:#f4f6f9;
-}
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-header {
-    background:#0b3d91;
-    color:white;
-    padding:15px 20px;
-    font-size:20px;
-    font-weight:bold;
-}
+  <style>
+    :root{
+      --brand:#0b3d91;
+      --bg:#f4f6f9;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --shadow:0 6px 18px rgba(0,0,0,.10);
+      --radius:14px;
+      --btn:#0b3d91;
+      --btn2:#4b5563;
+    }
+    *{ box-sizing:border-box; }
 
-.container {
-    display:flex;
-    height:90vh;
-}
+    body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:#111827; }
 
-.sidebar {
-    width:320px;
-    background:white;
-    padding:20px;
-    border-right:1px solid #ddd;
-    overflow-y:auto;
-}
+    header{
+      background:var(--brand);
+      color:#fff;
+      padding:16px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    header .title{
+      display:flex;
+      flex-direction:column;
+      line-height:1.15;
+    }
+    header .title strong{ font-size:18px; letter-spacing:.2px; }
+    header .title span{ font-size:12px; opacity:.9; }
+    header .pill{
+      background:rgba(255,255,255,.15);
+      border:1px solid rgba(255,255,255,.25);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      white-space:nowrap;
+    }
 
-.sidebar h3 {
-    margin-top:0;
-}
+    .wrap{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:14px;
+      padding:14px;
+      max-width:1400px;
+      margin:0 auto;
+    }
 
-button {
-    width:100%;
-    padding:10px;
-    margin-bottom:10px;
-    border:none;
-    border-radius:6px;
-    background:#0b3d91;
-    color:white;
-    cursor:pointer;
-}
+    .panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      height: calc(100vh - 110px);
+      display:flex;
+      flex-direction:column;
+    }
 
-button.secondary {
-    background:#666;
-}
+    .panel h3{
+      margin:0;
+      padding:14px 14px 10px;
+      border-bottom:1px solid var(--line);
+      font-size:14px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#111827;
+    }
+    .panel .content{
+      padding:14px;
+      overflow:auto;
+    }
 
-button:hover {
-    opacity:0.85;
-}
+    label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; }
+    select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:#fff;
+      outline:none;
+    }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
 
-.map-area {
-    flex:1;
-    position:relative;
-    background:#e0e6f1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:22px;
-    font-weight:bold;
-    color:#333;
-}
+    .btn{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      font-weight:700;
+      text-align:center;
+      margin-bottom:10px;
+      transition: all .12s ease;
+      color:#111827;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,.07); }
+    .btn.primary{ background:var(--btn); color:#fff; border-color:rgba(255,255,255,.25); }
+    .btn.secondary{ background:#6b7280; color:#fff; border-color:rgba(255,255,255,.25); }
 
-.layer-label {
-    position:absolute;
-    top:15px;
-    left:15px;
-    background:white;
-    padding:8px 12px;
-    border-radius:6px;
-    box-shadow:0 2px 5px rgba(0,0,0,0.2);
-}
+    .sectionTitle{
+      font-weight:900;
+      font-size:18px;
+      margin:14px 0 10px;
+    }
 
-.chart-panel {
-    position:absolute;
-    bottom:20px;
-    left:20px;
-    width:350px;
-    background:white;
-    padding:10px;
-    border-radius:8px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.2);
-    display:none;
-}
+    /* Map area */
+    .mapWrap{
+      height: calc(100vh - 110px);
+      min-height:650px;
+      border-radius:var(--radius);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+      background:#dde7ff;
+    }
+    #map{ height:100%; width:100%; }
 
-.chart-panel img {
-    width:100%;
-    border-radius:6px;
-}
-</style>
+    /* Legend box */
+    .legendBox{
+      position:absolute;
+      top:12px;
+      right:12px;
+      z-index:500;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:12px;
+      box-shadow:0 6px 16px rgba(0,0,0,.12);
+      padding:10px 12px;
+      width: 260px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .legendBox b{ color:#111827; }
+    .legendRow{ display:flex; align-items:center; gap:8px; margin-top:6px; }
+    .swatch{ width:14px; height:14px; border-radius:4px; border:1px solid rgba(0,0,0,.08); }
+
+    /* Chart thumbnails */
+    .thumbs{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .thumb{
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+      cursor:pointer;
+      transition: transform .12s ease;
+    }
+    .thumb:hover{ transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,.07); }
+    .thumb img{ width:100%; display:block; }
+
+    /* Modal */
+    .modal{
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center; padding:16px;
+      z-index:9999;
+    }
+    .modal.show{ display:flex; }
+    .modal .mcard{
+      background:#fff; border-radius:14px; overflow:hidden; width:min(1000px, 96vw);
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
+    }
+    .modal .mh{
+      padding:10px 14px; background:#f9fafb; border-bottom:1px solid var(--line);
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+    }
+    .modal .mh b{ font-size:13px; }
+    .modal .mh button{ border:none; background:transparent; cursor:pointer; font-size:20px; color:#6b7280; }
+    .modal .mb{ padding:10px; }
+    .modal img{ width:100%; border-radius:10px; }
+
+    /* Mobile */
+    @media (max-width: 980px){
+      .wrap{ grid-template-columns: 1fr; }
+      .panel{ height:auto; }
+      .mapWrap{ height:520px; min-height:520px; }
+    }
+  </style>
 </head>
 
 <body>
-
 <header>
-NOVEC Predictive Grid — Peer Testing Mockup
+  <div class="title">
+    <strong>NOVEC Predictive Grid — Peer Testing Mockup</strong>
+    <span>GEOG 778 • Early UX + spatial realism prototype (layers simulated)</span>
+  </div>
+  <div class="pill">Persona: Kim Sun Min • Planning & Operations</div>
 </header>
 
-<div class="container">
+<div class="wrap">
 
-<div class="sidebar">
-<h3>Layer Controls</h3>
+  <!-- LEFT PANEL -->
+  <div class="panel">
+    <h3>Controls</h3>
+    <div class="content">
 
-<button onclick="switchLayer('EV Density Layer')">EV Density</button>
-<button onclick="switchLayer('Solar Density Layer')">Solar Density</button>
-<button onclick="switchLayer('Gi* Hotspot Layer')">Gi* Hotspot</button>
-<button onclick="switchLayer('LISA Cluster Layer')">LISA Clusters</button>
+      <div class="grid2">
+        <div>
+          <label for="time">Time window</label>
+          <select id="time" onchange="updateStatus()">
+            <option>All time</option>
+            <option>Last 12 months</option>
+            <option>Last 6 months</option>
+            <option>Last 3 months</option>
+          </select>
+        </div>
+        <div>
+          <label for="tech">Technology</label>
+          <select id="tech" onchange="updateStatus()">
+            <option>EV + Solar</option>
+            <option>EV only</option>
+            <option>Solar only</option>
+            <option>Charging only</option>
+          </select>
+        </div>
+      </div>
 
-<h3>Charts</h3>
+      <div class="sectionTitle">Layer Controls</div>
+      <button class="btn primary" onclick="showLayer('base')">Base Map</button>
+      <button class="btn primary" onclick="showLayer('ev')">EV Density</button>
+      <button class="btn primary" onclick="showLayer('solar')">Solar Density</button>
+      <button class="btn primary" onclick="showLayer('hotspot')">Gi* Hotspot</button>
+      <button class="btn primary" onclick="showLayer('lisa')">LISA Clusters</button>
 
-<button class="secondary" onclick="showChart('Ev_purchase_trend_chart.png')">
-EV Purchase Trends
-</button>
+      <div class="sectionTitle">Charts</div>
+      <div class="thumbs">
+        <div class="thumb" onclick="openChart('Ev_purchase_trend_chart.png','EV Purchase Trends')">
+          <img src="Ev_purchase_trend_chart.png" alt="EV Purchase Trends">
+        </div>
+        <div class="thumb" onclick="openChart('Ev_underserved_zip_chart.png','Underserved ZIP Codes')">
+          <img src="Ev_underserved_zip_chart.png" alt="Underserved ZIP Codes">
+        </div>
+        <div class="thumb" onclick="openChart('Solar_ev_overlap_zip_chart.png','Solar + EV Overlap')">
+          <img src="Solar_ev_overlap_zip_chart.png" alt="Solar + EV Overlap">
+        </div>
+        <div class="thumb" onclick="openChart('Outreach_target_chart.png','Outreach Targets')">
+          <img src="Outreach_target_chart.png" alt="Outreach Targets">
+        </div>
+      </div>
 
-<button class="secondary" onclick="showChart('Ev_underserved_zip_chart.png')">
-Underserved ZIPs
-</button>
+      <div class="sectionTitle">Testing Simulation</div>
+      <button class="btn secondary" onclick="selectZip22192()">Select ZIP 22192</button>
 
-<button class="secondary" onclick="showChart('Solar_ev_overlap_zip_chart.png')">
-Solar + EV Overlap
-</button>
+      <div style="margin-top:12px; font-size:12px; color:var(--muted); line-height:1.4;">
+        <b>Note:</b> This is a UX prototype. Spatial layers are simulated to test layout and interaction flow.
+        Final version will load real PostGIS layers and analytics.
+      </div>
 
-<button class="secondary" onclick="showChart('Yearly_adoption_trends.png')">
-Yearly Adoption
-</button>
+    </div>
+  </div>
 
-<button onclick="hideChart()">Hide Chart</button>
+  <!-- MAP -->
+  <div class="mapWrap">
+    <div id="map"></div>
 
-<h3>Testing Simulation</h3>
-
-<button onclick="simulateZip()">Select ZIP 22192</button>
+    <div class="legendBox" id="legendBox">
+      <b>Legend</b>
+      <div style="margin-top:6px;">Select a layer to view its meaning.</div>
+      <div style="margin-top:8px;"><b>Filters:</b> <span id="statusText">All time • EV + Solar</span></div>
+    </div>
+  </div>
 
 </div>
 
-<div class="map-area">
-
-<div class="layer-label" id="layerLabel">
-Base Map View
+<!-- Chart Modal -->
+<div class="modal" id="modal" onclick="closeChart()">
+  <div class="mcard" onclick="event.stopPropagation()">
+    <div class="mh">
+      <b id="modalTitle">Chart</b>
+      <button onclick="closeChart()">×</button>
+    </div>
+    <div class="mb">
+      <img id="modalImg" src="" alt="Chart">
+    </div>
+  </div>
 </div>
 
-Interactive Map Area
-
-<div class="chart-panel" id="chartPanel">
-<img id="chartImage" src="">
-</div>
-
-</div>
-
-</div>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+  // --- STATUS TEXT ---
+  function updateStatus(){
+    const t = document.getElementById('time').value;
+    const tech = document.getElementById('tech').value;
+    document.getElementById('statusText').textContent = `${t} • ${tech}`;
+  }
 
-function switchLayer(layerName) {
-    document.getElementById("layerLabel").innerText = layerName;
-}
+  // --- CHART MODAL ---
+  function openChart(src, title){
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalImg').src = src;
+    document.getElementById('modal').classList.add('show');
+  }
+  function closeChart(){
+    document.getElementById('modal').classList.remove('show');
+  }
 
-function showChart(imageName) {
-    document.getElementById("chartPanel").style.display = "block";
-    document.getElementById("chartImage").src = imageName;
-}
+  // --- MAP INIT ---
+  const map = L.map('map', { zoomControl:true }).setView([38.75, -77.45], 9);
 
-function hideChart() {
-    document.getElementById("chartPanel").style.display = "none";
-}
+  // Basemap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
-function simulateZip() {
-    alert("ZIP 22192 Selected\n\nEV Density: High\nSolar Density: Moderate\nHotspot: Significant (p<0.05)\n\nPlanning Action Recommended.");
-}
+  // Simulated NOVEC Service Area (rough bounding polygon)
+  const novecArea = L.polygon([
+    [38.55, -77.85],
+    [39.00, -77.85],
+    [39.00, -76.95],
+    [38.55, -76.95]
+  ], {
+    color: "#0b3d91",
+    weight: 2,
+    fillColor: "#0b3d91",
+    fillOpacity: 0.10
+  }).addTo(map).bindPopup("<b>NOVEC Service Area</b><br>(Simulated boundary for mockup)");
+
+  // Simulated ZIP polygons
+  function zipStyle(color){
+    return { color: color, weight: 2, fillColor: color, fillOpacity: 0.35 };
+  }
+  function zipHover(e){
+    e.target.setStyle({ weight: 4, fillOpacity: 0.5 });
+  }
+  function zipOut(e){
+    e.target.setStyle({ weight: 2, fillOpacity: 0.35 });
+  }
+
+  // ZIP 22192 (Woodbridge area)
+  const zip22192 = L.polygon([
+    [38.62, -77.43],
+    [38.67, -77.43],
+    [38.67, -77.30],
+    [38.62, -77.30]
+  ], zipStyle("#ef4444"))
+  .on("mouseover", zipHover).on("mouseout", zipOut)
+  .bindPopup("<b>ZIP 22192</b><br>Simulated KPIs:<br>EV growth: High<br>Solar: Moderate<br>Suggested: Targeted outreach + capacity review");
+
+  // ZIP 20155 (Gainesville / Haymarket)
+  const zip20155 = L.polygon([
+    [38.78, -77.68],
+    [38.86, -77.68],
+    [38.86, -77.52],
+    [38.78, -77.52]
+  ], zipStyle("#f59e0b"))
+  .on("mouseover", zipHover).on("mouseout", zipOut)
+  .bindPopup("<b>ZIP 20155</b><br>Simulated KPIs:<br>EV growth: Moderate<br>Solar: High<br>Suggested: Interconnection planning + customer program focus");
+
+  // ZIP 22033 (Fairfax)
+  const zip22033 = L.polygon([
+    [38.82, -77.42],
+    [38.90, -77.42],
+    [38.90, -77.25],
+    [38.82, -77.25]
+  ], zipStyle("#10b981"))
+  .on("mouseover", zipHover).on("mouseout", zipOut)
+  .bindPopup("<b>ZIP 22033</b><br>Simulated KPIs:<br>EV growth: High<br>Solar: High<br>Suggested: Feeder upgrades + fast-charging access review");
+
+  // Layer Groups (toggle simulation)
+  const layerEV = L.layerGroup([zip22192]);
+  const layerSolar = L.layerGroup([zip20155]);
+  const layerLISA = L.layerGroup([zip22033]);
+
+  // Simulated Hotspot circles (Gi*)
+  const hotspot1 = L.circle([38.73, -77.35], { radius: 4500, color:"#2563eb", fillColor:"#2563eb", fillOpacity:0.25 })
+    .bindPopup("<b>Gi* Hotspot</b><br>(Simulated cluster, p&lt;0.05)");
+  const hotspot2 = L.circle([38.85, -77.58], { radius: 5500, color:"#2563eb", fillColor:"#2563eb", fillOpacity:0.25 })
+    .bindPopup("<b>Gi* Hotspot</b><br>(Simulated cluster, p&lt;0.05)");
+  const layerHotspot = L.layerGroup([hotspot1, hotspot2]);
+
+  // Keep track of what's visible
+  let activeLayer = null;
+
+  function clearActiveLayer(){
+    if(activeLayer){
+      map.removeLayer(activeLayer);
+      activeLayer = null;
+    }
+  }
+
+  function setLegend(layerKey){
+    const box = document.getElementById("legendBox");
+    const status = document.getElementById("statusText").textContent;
+
+    let html = `<b>Legend</b>
+      <div style="margin-top:8px;"><b>Filters:</b> ${status}</div>`;
+
+    if(layerKey === "base"){
+      html += `<div style="margin-top:8px;">Base map + simulated NOVEC boundary.</div>`;
+      html += `<div class="legendRow"><span class="swatch" style="background:#0b3d91;"></span> Service area boundary</div>`;
+    }
+    if(layerKey === "ev"){
+      html += `<div style="margin-top:8px;"><b>EV Density (simulated)</b></div>`;
+      html += `<div class="legendRow"><span class="swatch" style="background:#ef4444;"></span> Higher EV growth</div>`;
+      html += `<div style="margin-top:6px;">Use: identify adoption pressure zones.</div>`;
+    }
+    if(layerKey === "solar"){
+      html += `<div style="margin-top:8px;"><b>Solar Density (simulated)</b></div>`;
+      html += `<div class="legendRow"><span class="swatch" style="background:#f59e0b;"></span> Higher solar adoption</div>`;
+      html += `<div style="margin-top:6px;">Use: plan interconnection + feeder impacts.</div>`;
+    }
+    if(layerKey === "hotspot"){
+      html += `<div style="margin-top:8px;"><b>Gi* Hotspots (simulated)</b></div>`;
+      html += `<div class="legendRow"><span class="swatch" style="background:#2563eb;"></span> Significant cluster</div>`;
+      html += `<div style="margin-top:6px;">Use: validate statistically significant clustering.</div>`;
+    }
+    if(layerKey === "lisa"){
+      html += `<div style="margin-top:8px;"><b>LISA Clusters (simulated)</b></div>`;
+      html += `<div class="legendRow"><span class="swatch" style="background:#10b981;"></span> High-High cluster</div>`;
+      html += `<div style="margin-top:6px;">Use: highlight local autocorrelation patterns.</div>`;
+    }
+
+    box.innerHTML = html;
+  }
+
+  function showLayer(layerKey){
+    clearActiveLayer();
+
+    if(layerKey === "base"){
+      // show nothing extra besides boundary
+      activeLayer = null;
+      setLegend("base");
+      return;
+    }
+    if(layerKey === "ev"){
+      activeLayer = layerEV.addTo(map);
+      map.fitBounds(zip22192.getBounds(), { padding:[20,20] });
+      setLegend("ev");
+      return;
+    }
+    if(layerKey === "solar"){
+      activeLayer = layerSolar.addTo(map);
+      map.fitBounds(zip20155.getBounds(), { padding:[20,20] });
+      setLegend("solar");
+      return;
+    }
+    if(layerKey === "hotspot"){
+      activeLayer = layerHotspot.addTo(map);
+      map.fitBounds(novecArea.getBounds(), { padding:[20,20] });
+      setLegend("hotspot");
+      return;
+    }
+    if(layerKey === "lisa"){
+      activeLayer = layerLISA.addTo(map);
+      map.fitBounds(zip22033.getBounds(), { padding:[20,20] });
+      setLegend("lisa");
+      return;
+    }
+  }
+
+  // Default legend
+  setLegend("base");
+
+  // "Select ZIP 22192" button behavior
+  function selectZip22192(){
+    clearActiveLayer();
+    activeLayer = layerEV.addTo(map);
+    map.fitBounds(zip22192.getBounds(), { padding:[20,20] });
+    zip22192.addTo(map).openPopup();
+    setLegend("ev");
+  }
 
 </script>
-
 </body>
 </html>
