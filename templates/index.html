@@ -1,71 +1,179 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8"/>
-  <title>NOVEC Clean-Energy Adoption Explorer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link rel="stylesheet" href="/static/style.css"/>
+<title>NOVEC Predictive Grid - Mockup</title>
+<meta charset="UTF-8">
+
+<style>
+body {
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+}
+
+header {
+    background:#0b3d91;
+    color:white;
+    padding:15px 20px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.container {
+    display:flex;
+    height:90vh;
+}
+
+.sidebar {
+    width:320px;
+    background:white;
+    padding:20px;
+    border-right:1px solid #ddd;
+    overflow-y:auto;
+}
+
+.sidebar h3 {
+    margin-top:0;
+}
+
+button {
+    width:100%;
+    padding:10px;
+    margin-bottom:10px;
+    border:none;
+    border-radius:6px;
+    background:#0b3d91;
+    color:white;
+    cursor:pointer;
+}
+
+button.secondary {
+    background:#666;
+}
+
+button:hover {
+    opacity:0.85;
+}
+
+.map-area {
+    flex:1;
+    position:relative;
+    background:#e0e6f1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    font-weight:bold;
+    color:#333;
+}
+
+.layer-label {
+    position:absolute;
+    top:15px;
+    left:15px;
+    background:white;
+    padding:8px 12px;
+    border-radius:6px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.2);
+}
+
+.chart-panel {
+    position:absolute;
+    bottom:20px;
+    left:20px;
+    width:350px;
+    background:white;
+    padding:10px;
+    border-radius:8px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.2);
+    display:none;
+}
+
+.chart-panel img {
+    width:100%;
+    border-radius:6px;
+}
+</style>
 </head>
+
 <body>
-  <header class="header">
-    <div class="title">
-      <div class="h1">NOVEC Clean-Energy Adoption Explorer</div>
-      <div class="h2">EV + Solar + Charging Infrastructure (aggregated ZIP analytics)</div>
-    </div>
-    <div class="actions">
-      <button id="btnBuild" class="btn">Build/Refresh Metrics</button>
-      <button id="btnExport" class="btn">Export CSV</button>
-    </div>
-  </header>
 
-  <main class="layout">
-    <section class="panel">
-      <div class="panel-block">
-        <div class="panel-title">Filters</div>
+<header>
+NOVEC Predictive Grid — Peer Testing Mockup
+</header>
 
-        <label>Technology</label>
-        <select id="tech">
-          <option value="all">All (Score)</option>
-          <option value="ev">EV (EV points/km²)</option>
-          <option value="solar">Solar (customers/km²)</option>
-          <option value="charging">Charging (sites/km²)</option>
-        </select>
+<div class="container">
 
-        <label>Minimum Score (0–1)</label>
-        <input id="minScore" type="range" min="0" max="1" step="0.05" value="0"/>
-        <div class="small">Current: <span id="minScoreVal">0</span></div>
+<div class="sidebar">
+<h3>Layer Controls</h3>
 
-        <label>Minimum Tech Value (density threshold)</label>
-        <input id="minValue" type="number" min="0" step="0.1" value="0"/>
+<button onclick="switchLayer('EV Density Layer')">EV Density</button>
+<button onclick="switchLayer('Solar Density Layer')">Solar Density</button>
+<button onclick="switchLayer('Gi* Hotspot Layer')">Gi* Hotspot</button>
+<button onclick="switchLayer('LISA Cluster Layer')">LISA Clusters</button>
 
-        <button id="btnApply" class="btn primary">Apply</button>
-      </div>
+<h3>Charts</h3>
 
-      <div class="panel-block">
-        <div class="panel-title">Summary</div>
-        <div id="summary" class="kv"></div>
-      </div>
+<button class="secondary" onclick="showChart('Ev_purchase_trend_chart.png')">
+EV Purchase Trends
+</button>
 
-      <div class="panel-block">
-        <div class="panel-title">ZIP Search</div>
-        <input id="zipSearch" placeholder="Enter ZIP (e.g., 22030)"/>
-        <button id="btnSearch" class="btn">Zoom to ZIP</button>
-        <div class="small">Tip: Click a ZIP polygon for details.</div>
-      </div>
+<button class="secondary" onclick="showChart('Ev_underserved_zip_chart.png')">
+Underserved ZIPs
+</button>
 
-      <div class="panel-block">
-        <div class="panel-title">Top ZIPs (by score)</div>
-        <div id="topTable" class="table"></div>
-      </div>
-    </section>
+<button class="secondary" onclick="showChart('Solar_ev_overlap_zip_chart.png')">
+Solar + EV Overlap
+</button>
 
-    <section class="map-wrap">
-      <div id="map"></div>
-    </section>
-  </main>
+<button class="secondary" onclick="showChart('Yearly_adoption_trends.png')">
+Yearly Adoption
+</button>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/static/app.js"></script>
+<button onclick="hideChart()">Hide Chart</button>
+
+<h3>Testing Simulation</h3>
+
+<button onclick="simulateZip()">Select ZIP 22192</button>
+
+</div>
+
+<div class="map-area">
+
+<div class="layer-label" id="layerLabel">
+Base Map View
+</div>
+
+Interactive Map Area
+
+<div class="chart-panel" id="chartPanel">
+<img id="chartImage" src="">
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function switchLayer(layerName) {
+    document.getElementById("layerLabel").innerText = layerName;
+}
+
+function showChart(imageName) {
+    document.getElementById("chartPanel").style.display = "block";
+    document.getElementById("chartImage").src = imageName;
+}
+
+function hideChart() {
+    document.getElementById("chartPanel").style.display = "none";
+}
+
+function simulateZip() {
+    alert("ZIP 22192 Selected\n\nEV Density: High\nSolar Density: Moderate\nHotspot: Significant (p<0.05)\n\nPlanning Action Recommended.");
+}
+
+</script>
+
 </body>
 </html>
