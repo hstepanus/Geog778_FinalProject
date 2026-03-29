@@ -1,9 +1,9 @@
-const map = L.map('map', {
+const map = L.map("map", {
   zoomControl: true
 }).setView([38.75, -77.45], 9);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors'
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
 
 let solarLayer = null;
@@ -12,44 +12,50 @@ let boundaryVisible = true;
 let currentLayerType = "solar";
 
 function setLayerLabel(text) {
-  document.getElementById("layerLabel").innerText = text;
+  const label = document.getElementById("layerLabel");
+  if (label) {
+    label.innerText = text;
+  }
 }
 
-function getColor(d) {
-  return d > 6.5 ? '#7f0000' :
-         d > 5.5 ? '#b30000' :
-         d > 4.5 ? '#d7301f' :
-         d > 3.5 ? '#ef6548' :
-         d > 2.5 ? '#fc8d59' :
-         d > 1.5 ? '#fdbb84' :
-         d > 0.5 ? '#fdd49e' :
-                   '#fef0d9';
+function getSolarColor(value) {
+  return value > 6.5 ? "#7f0000" :
+         value > 5.5 ? "#b51f1f" :
+         value > 4.5 ? "#d9432f" :
+         value > 3.5 ? "#f06a3d" :
+         value > 2.5 ? "#ff9c51" :
+         value > 1.5 ? "#ffc66d" :
+         value > 0.5 ? "#ffe7a3" :
+                       "#fff8e1";
 }
 
 function solarStyle(feature) {
+  const density = Number(feature?.properties?.solar_density) || 0;
+
   return {
-    fillColor: getColor(feature.properties.solar_density),
-    weight: 0.6,
+    fillColor: getSolarColor(density),
+    weight: 0.9,
     opacity: 1,
-    color: '#586474',
+    color: "#6b7280",
     fillOpacity: 0.82
   };
 }
 
 function boundaryStyle() {
   return {
-    color: '#0b3d91',
+    color: "#123d87",
     weight: 3,
     opacity: 1,
     fill: false
   };
 }
 
-function highlightFeature(e) {
-  const layer = e.target;
+function highlightFeature(event) {
+  const layer = event.target;
+
   layer.setStyle({
-    weight: 2,
-    color: '#111827',
+    weight: 2.2,
+    color: "#0f172a",
     fillOpacity: 0.95
   });
 
@@ -58,24 +64,28 @@ function highlightFeature(e) {
   }
 }
 
-function resetHighlight(e) {
+function resetHighlight(event) {
   if (solarLayer) {
-    solarLayer.resetStyle(e.target);
+    solarLayer.resetStyle(event.target);
   }
 }
 
-function zoomToFeature(e) {
-  map.fitBounds(e.target.getBounds(), { padding: [20, 20] });
+function zoomToFeature(event) {
+  map.fitBounds(event.target.getBounds(), { padding: [20, 20] });
 }
 
 function onEachSolarFeature(feature, layer) {
-  const p = feature.properties;
+  const props = feature.properties || {};
+  const gridId = props.grid_id ?? "N/A";
+  const solarCount = props.solar_count ?? 0;
+  const solarDensity = Number(props.solar_density ?? 0).toFixed(2);
 
   layer.bindPopup(`
-    <div style="font-size:14px; line-height:1.55; min-width:180px;">
-      <strong>Grid ID:</strong> ${p.grid_id}<br>
-      <strong>Solar Count:</strong> ${p.solar_count}<br>
-      <strong>Solar Density:</strong> ${Number(p.solar_density).toFixed(2)} per km²
+    <div style="font-size:14px; line-height:1.6; min-width:190px; color:#1f2937;">
+      <div style="font-size:15px; font-weight:800; color:#102b5c; margin-bottom:6px;">Solar Density Cell</div>
+      <strong>Grid ID:</strong> ${gridId}<br>
+      <strong>Solar Count:</strong> ${solarCount}<br>
+      <strong>Solar Density:</strong> ${solarDensity} per km²
     </div>
   `);
 
@@ -88,8 +98,8 @@ function onEachSolarFeature(feature, layer) {
 
 function onEachBoundaryFeature(feature, layer) {
   layer.bindPopup(`
-    <div style="font-size:14px; line-height:1.5;">
-      <strong>NOVEC Service Area</strong><br>
+    <div style="font-size:14px; line-height:1.6; min-width:180px; color:#1f2937;">
+      <div style="font-size:15px; font-weight:800; color:#102b5c; margin-bottom:6px;">NOVEC Service Area</div>
       Boundary reference layer
     </div>
   `);
@@ -106,6 +116,7 @@ function showBaseMap() {
   removeAnalysisLayers();
   currentLayerType = "base";
   setLayerLabel("Base Map View");
+
   if (boundaryVisible && boundaryLayer) {
     boundaryLayer.bringToFront();
   }
@@ -115,14 +126,14 @@ function showSolarDensity() {
   removeAnalysisLayers();
   currentLayerType = "solar";
 
-  fetch('./static/data/solar_grid.geojson')
-    .then(response => {
+  fetch("./static/data/solar_grid.geojson")
+    .then((response) => {
       if (!response.ok) {
-        throw new Error('Could not load solar_grid.geojson');
+        throw new Error("Could not load solar_grid.geojson");
       }
       return response.json();
     })
-    .then(data => {
+    .then((data) => {
       solarLayer = L.geoJSON(data, {
         style: solarStyle,
         onEachFeature: onEachSolarFeature
@@ -132,24 +143,29 @@ function showSolarDensity() {
         boundaryLayer.bringToFront();
       }
 
-      map.fitBounds(solarLayer.getBounds(), { padding: [20, 20] });
+      try {
+        map.fitBounds(solarLayer.getBounds(), { padding: [20, 20] });
+      } catch (error) {
+        console.warn("Could not fit bounds for solar layer.", error);
+      }
+
       setLayerLabel("Solar Adoption Density");
     })
-    .catch(error => {
+    .catch((error) => {
       console.error(error);
       alert("Solar density layer could not be loaded. Verify ./static/data/solar_grid.geojson exists.");
     });
 }
 
 function loadBoundary() {
-  fetch('./static/data/novec_service_area.geojson')
-    .then(response => {
+  fetch("./static/data/novec_service_area.geojson")
+    .then((response) => {
       if (!response.ok) {
-        throw new Error('Could not load novec_service_area.geojson');
+        throw new Error("Could not load novec_service_area.geojson");
       }
       return response.json();
     })
-    .then(data => {
+    .then((data) => {
       boundaryLayer = L.geoJSON(data, {
         style: boundaryStyle,
         onEachFeature: onEachBoundaryFeature
@@ -159,7 +175,7 @@ function loadBoundary() {
         boundaryLayer.bringToFront();
       }
     })
-    .catch(error => {
+    .catch((error) => {
       console.error(error);
       alert("Boundary overlay could not be loaded. Verify ./static/data/novec_service_area.geojson exists.");
     });
@@ -188,25 +204,33 @@ function showPlaceholderLayer(layerName) {
   }
 
   alert(
-    layerName +
-    "\n\nThis view is reserved for the next analytical stage. The current live map layer is Solar Adoption Density."
+    `${layerName}\n\nThis view is reserved for the next analytical stage. The current live map layer is Solar Adoption Density.`
   );
 }
 
 function showChart(imagePath, title) {
-  document.getElementById("chartPanel").style.display = "block";
-  document.getElementById("chartImage").src = imagePath;
-  document.getElementById("chartTitle").innerText = title;
+  const chartPanel = document.getElementById("chartPanel");
+  const chartImage = document.getElementById("chartImage");
+  const chartTitle = document.getElementById("chartTitle");
+
+  if (!chartPanel || !chartImage || !chartTitle) return;
+
+  chartPanel.style.display = "block";
+  chartImage.src = imagePath;
+  chartTitle.innerText = title;
 }
 
 function hideChart() {
-  document.getElementById("chartPanel").style.display = "none";
+  const chartPanel = document.getElementById("chartPanel");
+  if (chartPanel) {
+    chartPanel.style.display = "none";
+  }
 }
 
-const legend = L.control({ position: 'bottomright' });
+const legend = L.control({ position: "bottomright" });
 
 legend.onAdd = function () {
-  const div = L.DomUtil.create('div', 'legend');
+  const div = L.DomUtil.create("div", "legend");
   div.innerHTML = `
     <div class="legend-title">Solar Density</div>
     <div class="legend-scale"></div>
@@ -215,7 +239,7 @@ legend.onAdd = function () {
       <span>High</span>
     </div>
     <div class="legend-note">
-      Color ramp represents grid-based solar adoption density calculated from clipped NOVEC-area solar points.
+      Grid-based solar adoption density calculated from clipped NOVEC-area solar points.
     </div>
   `;
   return div;
@@ -223,6 +247,5 @@ legend.onAdd = function () {
 
 legend.addTo(map);
 
-// Load layers on startup
 showSolarDensity();
 loadBoundary();
