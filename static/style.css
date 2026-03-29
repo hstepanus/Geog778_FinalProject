@@ -39,7 +39,7 @@ body{
   justify-content:space-between;
   padding:0 22px;
   background:linear-gradient(90deg,var(--navy-dark),var(--navy));
-  color:#fff;
+  color:#c6eb0b;
   box-shadow:0 6px 18px rgba(0,0,0,.16);
   position:relative;
   z-index:1000;
