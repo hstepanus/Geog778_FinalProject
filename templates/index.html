@@ -4,44 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NOVEC Predictive Grid</title>
-<div class="subtitle">
-Clean Energy Adoption Intelligence Dashboard
-</div>
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
     <style>
         :root {
             --brand: #0b3d91;
-            --brand-dark: #082c68;
+            --brand-dark: #082a63;
+            --brand-light: #dbe8fb;
             --bg: #eef3f8;
             --panel: #ffffff;
-            --text: #1e293b;
-            --muted: #64748b;
-            --line: #dbe3ee;
-            --shadow: 0 10px 28px rgba(15, 23, 42, 0.10);
-            --radius: 14px;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --line: #d7e0ea;
+            --shadow: 0 12px 28px rgba(15, 23, 42, 0.10);
+            --radius: 16px;
         }
 
         * {
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
             margin: 0;
+            padding: 0;
+            height: 100%;
             font-family: "Segoe UI", Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
         }
 
         .topbar {
-            height: 72px;
-            background: linear-gradient(90deg, var(--brand), #1457c0);
+            height: 78px;
+            background: linear-gradient(90deg, var(--brand-dark), var(--brand));
             color: white;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 22px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+            padding: 0 24px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.18);
         }
 
         .topbar-left {
@@ -51,31 +52,32 @@ Clean Energy Adoption Intelligence Dashboard
         }
 
         .topbar-title {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
             letter-spacing: 0.2px;
         }
 
         .topbar-subtitle {
             font-size: 13px;
-            opacity: 0.9;
+            opacity: 0.92;
+            letter-spacing: 0.2px;
         }
 
-        .topbar-badge {
-            background: rgba(255,255,255,0.14);
-            border: 1px solid rgba(255,255,255,0.25);
-            padding: 8px 12px;
-            border-radius: 999px;
+        .topbar-right {
             font-size: 12px;
             font-weight: 600;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.22);
+            padding: 9px 12px;
+            border-radius: 999px;
         }
 
-        .layout {
+        .dashboard {
             display: grid;
-            grid-template-columns: 340px 1fr;
+            grid-template-columns: 360px 1fr;
             gap: 16px;
             padding: 16px;
-            height: calc(100vh - 72px);
+            height: calc(100vh - 78px);
         }
 
         .sidebar {
@@ -95,67 +97,16 @@ Clean Energy Adoption Intelligence Dashboard
         .panel-header {
             padding: 14px 16px;
             border-bottom: 1px solid var(--line);
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-            color: var(--brand-dark);
             background: #f8fbff;
+            color: var(--brand-dark);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .panel-body {
             padding: 16px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 11px 12px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.15s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-
-        .btn-primary {
-            background: var(--brand);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0a347d;
-        }
-
-        .btn-secondary {
-            background: #667085;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #556272;
-        }
-
-        .btn-light {
-            background: #eef4fb;
-            color: var(--brand);
-            border: 1px solid #d7e4f8;
-        }
-
-        .btn-light:hover {
-            background: #e5eefb;
-        }
-
-        .mini-note {
-            margin-top: 8px;
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.55;
         }
 
         .metric-grid {
@@ -165,9 +116,9 @@ Clean Energy Adoption Intelligence Dashboard
         }
 
         .metric-card {
-            background: #f9fbfd;
+            background: #fbfdff;
             border: 1px solid var(--line);
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 12px;
         }
 
@@ -181,6 +132,64 @@ Clean Energy Adoption Intelligence Dashboard
             font-size: 24px;
             font-weight: 700;
             color: var(--brand-dark);
+        }
+
+        .metric-note {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 11px 12px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.95;
+        }
+
+        .btn-primary {
+            background: var(--brand);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0a347f;
+        }
+
+        .btn-secondary {
+            background: #5f6f86;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #506077;
+        }
+
+        .btn-light {
+            background: #eef4fc;
+            color: var(--brand);
+            border: 1px solid #d6e4f8;
+        }
+
+        .btn-light:hover {
+            background: #e6eef9;
+        }
+
+        .sidebar-note {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.55;
         }
 
         .map-shell {
@@ -198,26 +207,27 @@ Clean Energy Adoption Intelligence Dashboard
             height: 100%;
         }
 
-        .floating-title {
+        .map-title-box {
             position: absolute;
             top: 16px;
             left: 16px;
             z-index: 900;
             background: rgba(255,255,255,0.96);
-            padding: 10px 14px;
-            border-radius: 12px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-            border: 1px solid #e5edf6;
+            padding: 12px 14px;
+            border-radius: 14px;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.14);
+            border: 1px solid #e3ebf4;
+            min-width: 280px;
         }
 
-        .floating-title-main {
-            font-size: 16px;
+        .map-title-main {
+            font-size: 17px;
             font-weight: 700;
             color: var(--brand-dark);
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
 
-        .floating-title-sub {
+        .map-title-sub {
             font-size: 12px;
             color: var(--muted);
         }
@@ -226,93 +236,103 @@ Clean Energy Adoption Intelligence Dashboard
             position: absolute;
             bottom: 18px;
             left: 18px;
-            width: 390px;
-            max-width: calc(100% - 36px);
-            background: rgba(255,255,255,0.97);
-            padding: 12px;
-            border-radius: 14px;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-            display: none;
             z-index: 900;
-            border: 1px solid #e4ebf3;
+            width: 420px;
+            max-width: calc(100% - 36px);
+            background: rgba(255,255,255,0.98);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 16px 32px rgba(0,0,0,0.18);
+            padding: 14px;
+            display: none;
         }
 
         .chart-title {
             font-size: 14px;
             font-weight: 700;
-            margin-bottom: 10px;
             color: var(--brand-dark);
+            margin-bottom: 10px;
         }
 
         .chart-panel img {
             width: 100%;
             border-radius: 10px;
-            border: 1px solid #e8eef5;
+            border: 1px solid #e6edf5;
         }
 
         .legend {
-            background: rgba(255,255,255,0.96);
+            background: rgba(255,255,255,0.97);
+            border-radius: 14px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+            border: 1px solid #e4ebf3;
             padding: 12px 14px;
-            line-height: 18px;
             color: #334155;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            font-size: 12px;
-            border: 1px solid #e5edf6;
+            line-height: 18px;
+            min-width: 190px;
         }
 
-        .legend h4 {
-            margin: 0 0 8px;
+        .legend-title {
             font-size: 13px;
-            color: var(--brand-dark);
-        }
-
-        .legend i {
-            width: 16px;
-            height: 16px;
-            float: left;
-            margin-right: 8px;
-            opacity: 0.95;
-            border-radius: 3px;
-        }
-
-        .status-card {
-            background: linear-gradient(180deg, #f8fbff, #f3f8fd);
-            border: 1px solid #dde8f5;
-            border-radius: 12px;
-            padding: 12px;
-            margin-top: 8px;
-        }
-
-        .status-title {
-            font-size: 12px;
             font-weight: 700;
             color: var(--brand-dark);
-            margin-bottom: 6px;
-            text-transform: uppercase;
+            margin-bottom: 10px;
         }
 
-        .status-text {
-            font-size: 12px;
+        .legend-scale {
+            height: 14px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+            border: 1px solid #d7dde6;
+            background: linear-gradient(
+                to right,
+                #fef0d9 0%,
+                #fdd49e 16%,
+                #fdbb84 32%,
+                #fc8d59 48%,
+                #ef6548 64%,
+                #d7301f 78%,
+                #b30000 90%,
+                #7f0000 100%
+            );
+        }
+
+        .legend-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
             color: var(--muted);
-            line-height: 1.5;
         }
 
-        .sidebar-section-label {
-            font-size: 12px;
+        .legend-note {
+            margin-top: 8px;
+            font-size: 11px;
             color: var(--muted);
-            margin: 2px 0 10px;
+            line-height: 1.4;
         }
 
-        @media (max-width: 1000px) {
-            .layout {
+        .footer-note {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            z-index: 900;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid #e5ebf2;
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            color: var(--muted);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        @media (max-width: 1080px) {
+            .dashboard {
                 grid-template-columns: 1fr;
                 height: auto;
             }
 
             .map-shell {
                 height: 72vh;
-                min-height: 520px;
+                min-height: 540px;
             }
         }
     </style>
@@ -322,12 +342,12 @@ Clean Energy Adoption Intelligence Dashboard
 <div class="topbar">
     <div class="topbar-left">
         <div class="topbar-title">NOVEC Predictive Grid</div>
-        <div class="topbar-subtitle">Distributed Energy Adoption Explorer</div>
+        <div class="topbar-subtitle">Clean Energy Adoption Intelligence Dashboard</div>
     </div>
-   
+    <div class="topbar-right">Distributed Energy Planning View</div>
 </div>
 
-<div class="layout">
+<div class="dashboard">
     <div class="sidebar">
 
         <div class="panel">
@@ -337,18 +357,22 @@ Clean Energy Adoption Intelligence Dashboard
                     <div class="metric-card">
                         <div class="metric-label">Solar in NOVEC</div>
                         <div class="metric-value">2210</div>
+                        <div class="metric-note">Spatially clipped to service territory</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">EV Accounts</div>
                         <div class="metric-value">2401</div>
+                        <div class="metric-note">Current raw account total</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Chargers</div>
                         <div class="metric-value">1126</div>
+                        <div class="metric-note">Current raw infrastructure total</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-label">Live Spatial Layer</div>
-                        <div class="metric-value" style="font-size:18px;">Solar Grid</div>
+                        <div class="metric-label">Primary Spatial Layer</div>
+                        <div class="metric-value" style="font-size:18px;">Solar Density</div>
+                        <div class="metric-note">Grid-based analytical surface</div>
                     </div>
                 </div>
             </div>
@@ -357,19 +381,14 @@ Clean Energy Adoption Intelligence Dashboard
         <div class="panel">
             <div class="panel-header">Data Layers</div>
             <div class="panel-body">
-                <div class="sidebar-section-label">Switch between available and placeholder analytical views.</div>
-
                 <button class="btn btn-light" onclick="showBaseMap()">Base Map</button>
-                <button class="btn btn-primary" onclick="showSolarDensity()">Solar Density</button>
-                <button class="btn btn-primary" onclick="showPlaceholderLayer('EV Density Layer')">EV Density</button>
-                <button class="btn btn-primary" onclick="showPlaceholderLayer('Gi* Hotspot Layer')">Gi* Hotspot</button>
-                <button class="btn btn-primary" onclick="showPlaceholderLayer('LISA Cluster Layer')">LISA Clusters</button>
+                <button class="btn btn-primary" onclick="showSolarDensity()">Solar Adoption Density</button>
+                <button class="btn btn-primary" onclick="showPlaceholderLayer('EV Adoption Density')">EV Adoption Density</button>
+                <button class="btn btn-primary" onclick="showPlaceholderLayer('Statistically Significant Hotspots')">Statistically Significant Hotspots</button>
+                <button class="btn btn-primary" onclick="showPlaceholderLayer('Spatial Clusters (LISA)')">Spatial Clusters (LISA)</button>
 
-                <div class="status-card">
-                    <div class="status-title">Current status</div>
-                    <div class="status-text">
-                        Solar Density is connected to real PostGIS output. EV, hotspot, and LISA remain interface placeholders for this review build.
-                    </div>
+                <div class="sidebar-note">
+                    The Solar Adoption Density layer is connected to spatial analysis output generated from PostGIS and exported as GeoJSON for web delivery.
                 </div>
             </div>
         </div>
@@ -389,29 +408,19 @@ Clean Energy Adoption Intelligence Dashboard
                     Solar + EV Overlap
                 </button>
 
-                <button class="btn btn-secondary" onclick="showChart('{{ url_for('static', filename='yearly_adoption_trends.png') }}', 'Yearly Adoption')">
-                    Yearly Adoption
+                <button class="btn btn-secondary" onclick="showChart('{{ url_for('static', filename='yearly_adoption_trends.png') }}', 'Yearly Adoption Trends')">
+                    Yearly Adoption Trends
                 </button>
 
                 <button class="btn btn-light" onclick="hideChart()">Hide Chart</button>
             </div>
         </div>
-
-        <div class="panel">
-            <div class="panel-header">Testing Simulation</div>
-            <div class="panel-body">
-                <button class="btn btn-primary" onclick="simulateArea()">Select Example Area</button>
-                <p class="mini-note">
-                    Use this prototype to review layout clarity, usefulness of summary metrics, readability of density patterns, and whether the chart panel supports planning decisions.
-                </p>
-            </div>
-        </div>
     </div>
 
     <div class="map-shell">
-        <div class="floating-title">
-            <div class="floating-title-main" id="layerLabel">Base Map View</div>
-            <div class="floating-title-sub">Northern Virginia energy planning prototype</div>
+        <div class="map-title-box">
+            <div class="map-title-main" id="layerLabel">Base Map View</div>
+            <div class="map-title-sub">Northern Virginia electric cooperative service territory</div>
         </div>
 
         <div id="map"></div>
@@ -420,179 +429,15 @@ Clean Energy Adoption Intelligence Dashboard
             <div class="chart-title" id="chartTitle">Chart</div>
             <img id="chartImage" src="" alt="Chart preview">
         </div>
+
+        <div class="footer-note">
+            Data Source: NOVEC Service Area • Analysis: PostgreSQL/PostGIS • Web Map: Leaflet
+        </div>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-    const map = L.map('map').setView([38.75, -77.45], 9);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    let solarLayer = null;
-    let currentLayerType = "base";
-
-    function setLayerLabel(text) {
-        document.getElementById("layerLabel").innerText = text;
-    }
-
-    function getColor(d) {
-        return d > 6.5 ? '#7f0000' :
-               d > 5.5 ? '#b30000' :
-               d > 4.5 ? '#d7301f' :
-               d > 3.5 ? '#ef6548' :
-               d > 2.5 ? '#fc8d59' :
-               d > 1.5 ? '#fdbb84' :
-               d > 0.5 ? '#fdd49e' :
-                         '#fef0d9';
-    }
-
-    function solarStyle(feature) {
-        return {
-            fillColor: getColor(feature.properties.solar_density),
-            weight: 0.7,
-            opacity: 1,
-            color: '#5b6575',
-            fillOpacity: 0.78
-        };
-    }
-
-    function highlightFeature(e) {
-        const layer = e.target;
-        layer.setStyle({
-            weight: 2,
-            color: '#111827',
-            fillOpacity: 0.92
-        });
-
-        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-            layer.bringToFront();
-        }
-    }
-
-    function resetHighlight(e) {
-        if (solarLayer) {
-            solarLayer.resetStyle(e.target);
-        }
-    }
-
-    function zoomToFeature(e) {
-        map.fitBounds(e.target.getBounds());
-    }
-
-    function onEachSolarFeature(feature, layer) {
-        const p = feature.properties;
-
-        layer.bindPopup(`
-            <div style="font-size:14px; line-height:1.5;">
-                <strong>Grid ID:</strong> ${p.grid_id}<br>
-                <strong>Solar Count:</strong> ${p.solar_count}<br>
-                <strong>Solar Density:</strong> ${Number(p.solar_density).toFixed(2)} / km²
-            </div>
-        `);
-
-        layer.on({
-            mouseover: highlightFeature,
-            mouseout: resetHighlight,
-            click: zoomToFeature
-        });
-    }
-
-    function removeAnalysisLayers() {
-        if (solarLayer) {
-            map.removeLayer(solarLayer);
-            solarLayer = null;
-        }
-    }
-
-    function showBaseMap() {
-        removeAnalysisLayers();
-        currentLayerType = "base";
-        setLayerLabel("Base Map View");
-    }
-
-    function showSolarDensity() {
-        removeAnalysisLayers();
-        currentLayerType = "solar";
-
-        fetch('{{ url_for("static", filename="data/solar_grid.geojson") }}')
-            .then(response => response.json())
-            .then(data => {
-                solarLayer = L.geoJSON(data, {
-                    style: solarStyle,
-                    onEachFeature: onEachSolarFeature
-                }).addTo(map);
-
-                map.fitBounds(solarLayer.getBounds());
-                setLayerLabel("Solar Density Layer");
-            })
-            .catch(error => {
-                console.error("Error loading solar GeoJSON:", error);
-                alert("Could not load solar density layer. Check static/data/solar_grid.geojson.");
-            });
-    }
-
-    function showPlaceholderLayer(layerName) {
-        removeAnalysisLayers();
-        currentLayerType = "placeholder";
-        setLayerLabel(layerName);
-
-        alert(
-            layerName +
-            "\n\nThis is currently a design placeholder.\nSolar Density is the real connected analytical layer in this build."
-        );
-    }
-
-    function showChart(imagePath, title) {
-        document.getElementById("chartPanel").style.display = "block";
-        document.getElementById("chartImage").src = imagePath;
-        document.getElementById("chartTitle").innerText = title;
-    }
-
-    function hideChart() {
-        document.getElementById("chartPanel").style.display = "none";
-    }
-
-    function simulateArea() {
-        if (currentLayerType !== "solar") {
-            alert(
-                "Example area selected.\n\nTurn on Solar Density to view the live spatial layer and interact with real density values."
-            );
-            return;
-        }
-
-        alert(
-            "Example Area Selected\n\n" +
-            "Solar Density: High\n" +
-            "Pattern: Concentrated distributed energy adoption\n" +
-            "Planning Insight: Candidate area for continued monitoring and infrastructure planning."
-        );
-    }
-
-    const legend = L.control({ position: 'bottomright' });
-
-    legend.onAdd = function () {
-        const div = L.DomUtil.create('div', 'legend');
-        const grades = [0, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5];
-
-        div.innerHTML += '<h4>Solar Density</h4>';
-
-        for (let i = 0; i < grades.length; i++) {
-            const from = grades[i];
-            const to = grades[i + 1];
-
-            div.innerHTML +=
-                '<i style="background:' + getColor(from + 0.01) + '"></i> ' +
-                from + (to ? '&ndash;' + to : '+') + '<br>';
-        }
-
-        return div;
-    };
-
-    legend.addTo(map);
-</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
 
 </body>
 </html>
