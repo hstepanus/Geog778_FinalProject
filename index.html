@@ -4,509 +4,116 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NOVEC Predictive Grid</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <style>
-    :root{
-      --navy:#183b7a;
-      --navy-dark:#102b5c;
-      --navy-soft:#eaf1ff;
 
-      --blue:#2f6fe4;
-      --blue-soft:#dfeaff;
-
-      --solar:#f4a62a;
-      --solar-dark:#e48800;
-      --solar-soft:#fff2d9;
-
-      --green:#24a85a;
-      --green-soft:#dff7e7;
-
-      --red:#e14b4b;
-      --red-soft:#fde4e4;
-
-      --panel:#ffffff;
-      --bg:#eef3f8;
-      --line:#dbe4ef;
-      --text:#1f2d3d;
-      --muted:#6b7a90;
-
-      --shadow:0 12px 28px rgba(15, 23, 42, 0.10);
-      --shadow-soft:0 8px 20px rgba(15, 23, 42, 0.08);
-      --radius:18px;
-      --radius-sm:14px;
-    }
-
-    *{
-      box-sizing:border-box;
-    }
-
-    html, body{
-      margin:0;
-      padding:0;
-      height:100%;
-      font-family:"Segoe UI", system-ui, -apple-system, Arial, sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
-
-    body{
-      overflow:hidden;
-    }
-
-    .topbar{
-      height:84px;
-      background:linear-gradient(90deg, var(--navy-dark), var(--navy));
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:0 24px;
-      box-shadow:0 6px 18px rgba(0,0,0,.16);
-      position:relative;
-      z-index:1000;
-    }
-
-    .topbar-title{
-      font-size:26px;
-      font-weight:800;
-      letter-spacing:.2px;
-      line-height:1.1;
-    }
-
-    .topbar-subtitle{
-      font-size:13px;
-      color:rgba(255,255,255,.88);
-      margin-top:6px;
-    }
-
-    .topbar-right{
-      background:rgba(255,255,255,.14);
-      border:1px solid rgba(255,255,255,.24);
-      padding:10px 14px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:700;
-      backdrop-filter:blur(6px);
-    }
-
-    .dashboard{
-      display:grid;
-      grid-template-columns:360px 1fr;
-      gap:16px;
-      padding:16px;
-      height:calc(100vh - 84px);
-    }
-
-    .sidebar{
-      overflow-y:auto;
-      padding-right:2px;
-    }
-
-    .sidebar::-webkit-scrollbar{
-      width:10px;
-    }
-
-    .sidebar::-webkit-scrollbar-thumb{
-      background:#cfd9e6;
-      border-radius:999px;
-    }
-
-    .panel{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      margin-bottom:14px;
-      overflow:hidden;
-    }
-
-    .panel-header{
-      padding:14px 16px;
-      border-bottom:1px solid var(--line);
-      background:linear-gradient(180deg,#f9fbff,#f3f7fd);
-      color:var(--navy-dark);
-      font-size:13px;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.5px;
-    }
-
-    .panel-body{
-      padding:16px;
-    }
-
-    .metric-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-
-    .metric-card{
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
-      background:linear-gradient(180deg,#ffffff,#f9fbff);
-      box-shadow:var(--shadow-soft);
-    }
-
-    .metric-card.solar{
-      background:linear-gradient(180deg,#fffaf1,#fff3dc);
-    }
-
-    .metric-card.ev{
-      background:linear-gradient(180deg,#f7faff,#eaf2ff);
-    }
-
-    .metric-card.charger{
-      background:linear-gradient(180deg,#f5fff8,#e7f9ee);
-    }
-
-    .metric-card.primary{
-      background:linear-gradient(180deg,#f8faff,#eef4ff);
-    }
-
-    .metric-label{
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:8px;
-      font-weight:600;
-    }
-
-    .metric-value{
-      font-size:34px;
-      line-height:1;
-      font-weight:800;
-      color:var(--navy-dark);
-    }
-
-    .metric-value.small-text{
-      font-size:19px;
-      line-height:1.2;
-    }
-
-    .metric-note{
-      font-size:11px;
-      color:var(--muted);
-      margin-top:8px;
-      line-height:1.45;
-    }
-
-    .button-grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-    }
-
-    .btn{
-      width:100%;
-      border:none;
-      border-radius:14px;
-      padding:12px 14px;
-      cursor:pointer;
-      font-size:14px;
-      font-weight:700;
-      text-align:left;
-      transition:transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
-      box-shadow:var(--shadow-soft);
-    }
-
-    .btn:hover{
-      transform:translateY(-1px);
-      filter:brightness(.99);
-    }
-
-    .btn:active{
-      transform:translateY(0);
-    }
-
-    .btn-neutral{
-      background:#eef3fb;
-      color:var(--navy-dark);
-      border:1px solid #d7e2f0;
-    }
-
-    .btn-solar{
-      background:linear-gradient(180deg,var(--solar),var(--solar-dark));
-      color:#fff;
-    }
-
-    .btn-ev{
-      background:linear-gradient(180deg,#4282ef,#245fd4);
-      color:#fff;
-    }
-
-    .btn-hotspot{
-      background:linear-gradient(180deg,#f15a5a,#db3939);
-      color:#fff;
-    }
-
-    .btn-lisa{
-      background:linear-gradient(180deg,#7b61ff,#6047de);
-      color:#fff;
-    }
-
-    .btn-boundary{
-      background:linear-gradient(180deg,#edf4ff,#dfeaff);
-      color:var(--navy);
-      border:1px solid #cfe0f6;
-    }
-
-    .btn-secondary{
-      background:linear-gradient(180deg,#60748e,#4a5f78);
-      color:#fff;
-    }
-
-    .sidebar-note{
-      margin-top:10px;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.6;
-      background:#f8fbff;
-      border:1px solid #e6edf6;
-      border-radius:12px;
-      padding:12px;
-    }
-
-    .map-shell{
-      position:relative;
-      height:100%;
-      border-radius:22px;
-      overflow:hidden;
-      border:1px solid var(--line);
-      box-shadow:var(--shadow);
-      background:#fff;
-    }
-
-    #map{
-      width:100%;
-      height:100%;
-    }
-
-    .map-title-box{
-      position:absolute;
-      top:16px;
-      left:16px;
-      z-index:900;
-      background:rgba(255,255,255,.97);
-      border:1px solid #e6edf5;
-      box-shadow:0 10px 24px rgba(0,0,0,.14);
-      border-radius:16px;
-      padding:14px 16px;
-      min-width:320px;
-      backdrop-filter:blur(7px);
-    }
-
-    .map-title-main{
-      font-size:18px;
-      font-weight:800;
-      color:var(--navy-dark);
-      margin-bottom:5px;
-    }
-
-    .map-title-sub{
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    .chart-panel{
-      position:absolute;
-      bottom:18px;
-      left:18px;
-      z-index:900;
-      width:420px;
-      max-width:calc(100% - 36px);
-      background:rgba(255,255,255,.98);
-      border:1px solid #e2e8f0;
-      border-radius:16px;
-      box-shadow:0 16px 32px rgba(0,0,0,.18);
-      padding:14px;
-      display:none;
-    }
-
-    .chart-title{
-      font-size:14px;
-      font-weight:800;
-      color:var(--navy-dark);
-      margin-bottom:10px;
-    }
-
-    .chart-panel img{
-      width:100%;
-      border-radius:12px;
-      border:1px solid #e7edf5;
-    }
-
-    .footer-note{
-      position:absolute;
-      bottom:12px;
-      right:16px;
-      z-index:900;
-      background:rgba(255,255,255,.94);
-      border:1px solid #e4ebf2;
-      padding:8px 10px;
-      border-radius:10px;
-      font-size:11px;
-      color:var(--muted);
-      box-shadow:0 4px 12px rgba(0,0,0,.08);
-    }
-
-    .legend{
-      background:rgba(255,255,255,.97);
-      border-radius:14px;
-      box-shadow:0 10px 24px rgba(0,0,0,.16);
-      border:1px solid #e4ebf3;
-      padding:12px 14px;
-      width:230px;
-      color:#334155;
-      line-height:1.2;
-      backdrop-filter:blur(6px);
-    }
-
-    .legend-title{
-      font-size:13px;
-      font-weight:800;
-      color:var(--navy-dark);
-      margin-bottom:10px;
-    }
-
-    .legend-scale{
-      height:12px;
-      border-radius:999px;
-      margin-bottom:8px;
-      border:1px solid #d7dde6;
-      background:linear-gradient(
-        to right,
-        #fff8e1 0%,
-        #ffe7a3 16%,
-        #ffc66d 32%,
-        #ff9c51 48%,
-        #f06a3d 64%,
-        #d9432f 78%,
-        #b51f1f 90%,
-        #7f0000 100%
-      );
-    }
-
-    .legend-labels{
-      display:flex;
-      justify-content:space-between;
-      font-size:11px;
-      color:var(--muted);
-      font-weight:600;
-    }
-
-    .legend-note{
-      margin-top:8px;
-      font-size:11px;
-      color:var(--muted);
-      line-height:1.45;
-    }
-
-    .leaflet-control-zoom{
-      border:none !important;
-      box-shadow:0 8px 18px rgba(0,0,0,.14) !important;
-      border-radius:14px !important;
-      overflow:hidden;
-    }
-
-    .leaflet-control-zoom a{
-      width:38px !important;
-      height:38px !important;
-      line-height:38px !important;
-      font-size:20px !important;
-      color:var(--navy-dark) !important;
-    }
-
-    .leaflet-popup-content-wrapper{
-      border-radius:14px;
-      box-shadow:0 10px 24px rgba(0,0,0,.18);
-    }
-
-    .leaflet-popup-content{
-      margin:12px 14px;
-    }
-
-    @media (max-width:1080px){
-      body{
-        overflow:auto;
-      }
-
-      .dashboard{
-        grid-template-columns:1fr;
-        height:auto;
-      }
-
-      .map-shell{
-        height:72vh;
-        min-height:540px;
-      }
-    }
-  </style>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+  <link rel="stylesheet" href="./static/style.css" />
 </head>
 <body>
-  <div class="topbar">
-    <div>
+  <header class="topbar">
+    <div class="topbar-left">
       <div class="topbar-title">NOVEC Predictive Grid</div>
       <div class="topbar-subtitle">Clean Energy Adoption Intelligence Dashboard</div>
     </div>
     <div class="topbar-right">Distributed Energy Planning View</div>
-  </div>
+  </header>
 
-  <div class="dashboard">
-    <div class="sidebar">
-      <div class="panel">
+  <main class="dashboard">
+    <aside class="sidebar compact">
+      <section class="panel">
+        <div class="panel-header">Layer Controls</div>
+        <div class="panel-body">
+
+          <div class="toggle-group">
+            <div class="toggle-row">
+              <span class="toggle-label neutral">Base Map</span>
+              <label class="switch">
+                <input type="checkbox" id="toggleBaseMap">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <span class="toggle-label solar">Solar Density</span>
+              <label class="switch">
+                <input type="checkbox" id="toggleSolar" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <span class="toggle-label boundary">NOVEC Boundary</span>
+              <label class="switch">
+                <input type="checkbox" id="toggleBoundaryLayer" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <span class="toggle-label ev">EV Density</span>
+              <label class="switch">
+                <input type="checkbox" id="toggleEV">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <span class="toggle-label hotspot">Hotspots</span>
+              <label class="switch">
+                <input type="checkbox" id="toggleHotspots">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <span class="toggle-label lisa">LISA Clusters</span>
+              <label class="switch">
+                <input type="checkbox" id="toggleLISA">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="sidebar-note">
+            One analytical surface is shown at a time. Boundary can remain on as a reference overlay.
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
         <div class="panel-header">Summary Metrics</div>
         <div class="panel-body">
           <div class="metric-grid">
             <div class="metric-card solar">
               <div class="metric-label">Solar in NOVEC</div>
               <div class="metric-value">2210</div>
-              <div class="metric-note">Spatially clipped to service territory</div>
             </div>
 
             <div class="metric-card ev">
               <div class="metric-label">EV Accounts</div>
               <div class="metric-value">2401</div>
-              <div class="metric-note">Current raw account total</div>
             </div>
 
             <div class="metric-card charger">
               <div class="metric-label">Chargers</div>
               <div class="metric-value">1126</div>
-              <div class="metric-note">Current raw infrastructure total</div>
             </div>
 
             <div class="metric-card primary">
-              <div class="metric-label">Primary Spatial Layer</div>
-              <div class="metric-value small-text">Solar Density</div>
-              <div class="metric-note">Grid-based analytical surface</div>
+              <div class="metric-label">Current View</div>
+              <div class="metric-value metric-small" id="activeMetric">Solar Density</div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="panel">
-        <div class="panel-header">Data Layers</div>
+      <section class="panel">
+        <div class="panel-header">Insights</div>
         <div class="panel-body">
-          <div class="button-grid">
-            <button class="btn btn-neutral" onclick="showBaseMap()">Base Map</button>
-            <button class="btn btn-solar" onclick="showSolarDensity()">Solar Adoption Density</button>
-            <button class="btn btn-boundary" onclick="toggleBoundary()">NOVEC Boundary</button>
-            <button class="btn btn-ev" onclick="showPlaceholderLayer('EV Adoption Density')">EV Adoption Density</button>
-            <button class="btn btn-hotspot" onclick="showPlaceholderLayer('Statistically Significant Hotspots')">Statistically Significant Hotspots</button>
-            <button class="btn btn-lisa" onclick="showPlaceholderLayer('Spatial Clusters (LISA)')">Spatial Clusters (LISA)</button>
-          </div>
-
-          <div class="sidebar-note">
-            Solar Adoption Density is connected to spatial analysis output exported from PostGIS as GeoJSON. The NOVEC service area boundary is displayed as a reference overlay.
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header">Insights & Analytics</div>
-        <div class="panel-body">
-          <div class="button-grid">
+          <div class="button-stack">
             <button class="btn btn-secondary" onclick="showChart('./static/ev_purchase_trend_chart.png', 'EV Purchase Trends')">
               EV Purchase Trends
             </button>
@@ -526,10 +133,10 @@
             <button class="btn btn-neutral" onclick="hideChart()">Hide Chart</button>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </aside>
 
-    <div class="map-shell">
+    <section class="map-shell">
       <div class="map-title-box">
         <div class="map-title-main" id="layerLabel">Solar Adoption Density</div>
         <div class="map-title-sub">Northern Virginia electric cooperative service territory</div>
@@ -539,16 +146,19 @@
 
       <div class="chart-panel" id="chartPanel">
         <div class="chart-title" id="chartTitle">Chart</div>
-        <img id="chartImage" src="" alt="Chart preview">
+        <img id="chartImage" src="" alt="Chart preview" />
       </div>
 
       <div class="footer-note">
         Data Source: NOVEC Service Area • Analysis: PostgreSQL/PostGIS • Web Map: Leaflet
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+  ></script>
   <script src="./static/app.js"></script>
 </body>
 </html>
