@@ -185,14 +185,16 @@
       <div class="analysis-panel" id="analysisPanel">
         <div class="analysis-title" id="analysisTitle">Solar Analytical Summary</div>
         <div class="analysis-subtitle" id="analysisSubtitle">Grid-based adoption surface</div>
-        <div class="analysis-grid" id="analysisGrid"></div>
-        <div class="analysis-insight" id="analysisInsight"></div>
+        <div class="analysis-list" id="analysisGrid"></div>
+        <div class="analysis-insight" id="analysisInsight">
+          Turn on a layer to see analytical context.
+        </div>
       </div>
 
       <div class="chart-panel" id="chartPanel">
         <div class="chart-panel-header">
           <div class="chart-panel-title" id="chartTitle">Chart</div>
-          <button class="chart-close-btn" onclick="hideChart()">×</button>
+          <button class="chart-close-btn" type="button" onclick="hideChart()">×</button>
         </div>
         <img id="chartImage" src="" alt="Chart preview" />
       </div>

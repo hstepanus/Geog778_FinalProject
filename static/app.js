@@ -73,7 +73,6 @@ function getHotspotClass(props = {}) {
     props.hotspot_class ??
     props.class ??
     props.hotspot ??
-    props.hotspotClass ??
     "Neutral"
   ).trim();
 }
@@ -83,7 +82,6 @@ function getLISAClass(props = {}) {
     props.lisa_cluster ??
     props.cluster ??
     props.lisa ??
-    props.lisaClass ??
     "Not Significant"
   ).trim();
 }
@@ -106,7 +104,6 @@ function getLISAColor(props = {}) {
 
 function setActiveViewLabel() {
   const active = [];
-
   if (solarLayer && map.hasLayer(solarLayer)) active.push("Solar Density");
   if (evLayer && map.hasLayer(evLayer)) active.push("EV Density");
   if (hotspotLayer && map.hasLayer(hotspotLayer)) active.push("Hotspots");
@@ -170,9 +167,7 @@ function bindInteractiveEvents(layer) {
 }
 
 function addLayerToMap(layer) {
-  if (layer && !map.hasLayer(layer)) {
-    layer.addTo(map);
-  }
+  if (layer && !map.hasLayer(layer)) layer.addTo(map);
   keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
@@ -180,9 +175,7 @@ function addLayerToMap(layer) {
 }
 
 function removeLayerFromMap(layer) {
-  if (layer && map.hasLayer(layer)) {
-    map.removeLayer(layer);
-  }
+  if (layer && map.hasLayer(layer)) map.removeLayer(layer);
   keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
@@ -251,12 +244,8 @@ function updateAnalysisPanel() {
 
   if (active === "solar" && solarData?.features?.length) {
     const features = solarData.features;
-    const densities = features
-      .map(f => Number(f?.properties?.solar_density))
-      .filter(Number.isFinite);
-    const counts = features
-      .map(f => Number(f?.properties?.solar_count))
-      .filter(Number.isFinite);
+    const densities = features.map(f => Number(f?.properties?.solar_density)).filter(Number.isFinite);
+    const counts = features.map(f => Number(f?.properties?.solar_count)).filter(Number.isFinite);
     const top = topValue(features, f => f?.properties?.solar_density);
 
     titleEl.innerText = "Solar Analytical Summary";
@@ -269,16 +258,14 @@ function updateAnalysisPanel() {
     ].join("");
 
     insightEl.innerText = top
-      ? `Highest solar density appears in grid ${top.gridId} at approximately ${safeNumber(top.value)} installs per km², indicating one of the strongest local adoption concentrations in the service territory.`
+      ? `Highest solar density appears in grid ${top.gridId} at approximately ${safeNumber(top.value)} installs per km².`
       : "Solar density metrics are available once the layer is loaded.";
     return;
   }
 
   if (active === "ev" && evData?.features?.length) {
     const features = evData.features;
-    const densities = features
-      .map(f => Number(f?.properties?.ev_density))
-      .filter(Number.isFinite);
+    const densities = features.map(f => Number(f?.properties?.ev_density)).filter(Number.isFinite);
     const top = topValue(features, f => f?.properties?.ev_density);
 
     titleEl.innerText = "EV Analytical Summary";
@@ -291,7 +278,7 @@ function updateAnalysisPanel() {
     ].join("");
 
     insightEl.innerText = top
-      ? `Grid ${top.gridId} has the highest estimated EV density at ${safeNumber(top.value)} per km², suggesting a strong candidate area for infrastructure planning, outreach, or localized grid-readiness review.`
+      ? `Grid ${top.gridId} has the highest estimated EV density at ${safeNumber(top.value)} per km², suggesting a strong candidate area for infrastructure planning.`
       : "EV density metrics are available once the layer is loaded.";
     return;
   }
@@ -312,7 +299,7 @@ function updateAnalysisPanel() {
       createStatCard("Total Cells", safeInt(features.length))
     ].join("");
 
-    insightEl.innerText = `The hotspot layer separates concentrated EV-related intensity from relatively weak local concentration. Hot spots (${safeInt(hot)}) indicate stronger local clustering, while cold spots (${safeInt(cold)}) indicate weaker surrounding density patterns.`;
+    insightEl.innerText = `Hot spots (${safeInt(hot)}) indicate stronger local clustering, while cold spots (${safeInt(cold)}) indicate weaker surrounding density patterns.`;
     return;
   }
 
@@ -333,7 +320,7 @@ function updateAnalysisPanel() {
       createStatCard("Low-High", safeInt(lh))
     ].join("");
 
-    insightEl.innerText = `High-High clusters (${safeInt(hh)}) indicate stable local adoption cores, while High-Low (${safeInt(hl)}) and Low-High (${safeInt(lh)}) cells identify spatial outliers that may reflect edge conditions, transition zones, or uneven local diffusion.`;
+    insightEl.innerText = `High-High clusters (${safeInt(hh)}) indicate stable adoption cores, while High-Low and Low-High cells suggest local spatial outliers.`;
     return;
   }
 
@@ -345,8 +332,7 @@ function updateAnalysisPanel() {
     createStatCard("Hotspots", "Off"),
     createStatCard("LISA", "Off")
   ].join("");
-
-  insightEl.innerText = "Turn on a layer to see analytical context, summary counts, and an executive interpretation of the active map view.";
+  insightEl.innerText = "Turn on a layer to see analytical context and summary counts.";
 }
 
 function loadSolarLayer() {
@@ -508,9 +494,7 @@ function loadBoundary() {
           dashArray: "4,4"
         },
         onEachFeature: (feature, layer) => {
-          layer.bindPopup(
-            popupHTML("NOVEC Service Area", ["Boundary reference overlay"])
-          );
+          layer.bindPopup(popupHTML("NOVEC Service Area", ["Boundary reference overlay"]));
         }
       }).addTo(map);
 
@@ -534,14 +518,13 @@ function showChart(imagePath, title) {
 
   panel.style.display = "block";
   image.src = imagePath;
+  image.alt = title;
   text.innerText = title;
 }
 
 function hideChart() {
   const panel = document.getElementById("chartPanel");
-  if (panel) {
-    panel.style.display = "none";
-  }
+  if (panel) panel.style.display = "none";
 }
 
 const legend = L.control({ position: "bottomright" });
@@ -571,7 +554,6 @@ function updateLegend() {
       <div class="legend-row"><span class="legend-swatch" style="background:#4575b4"></span>Low-Low</div>
       <div class="legend-row"><span class="legend-swatch" style="background:#fdae61"></span>High-Low</div>
       <div class="legend-row"><span class="legend-swatch" style="background:#66bd63"></span>Low-High</div>
-      <div class="legend-row"><span class="legend-swatch" style="background:#d9dee7"></span>Not Significant</div>
     `;
     return;
   }
@@ -591,7 +573,6 @@ function updateLegend() {
       <div class="legend-title">EV Density</div>
       <div class="legend-gradient" style="background:linear-gradient(to right,#e5f0ff 0%,#9cc0f8 25%,#5c91ee 50%,#2f6fe4 75%,#0b3b8c 100%);"></div>
       <div class="legend-labels"><span>Low</span><span>High</span></div>
-      <div class="legend-note">Estimated EV density per square kilometer.</div>
     `;
     return;
   }
@@ -601,14 +582,13 @@ function updateLegend() {
       <div class="legend-title">Solar Density</div>
       <div class="legend-gradient" style="background:linear-gradient(to right,#fff8e1 0%,#ffe7a3 16%,#ffc66d 32%,#ff9c51 48%,#f06a3d 64%,#d9432f 78%,#b51f1f 90%,#7f0000 100%);"></div>
       <div class="legend-labels"><span>Low</span><span>High</span></div>
-      <div class="legend-note">Grid-based solar adoption density surface.</div>
     `;
     return;
   }
 
   div.innerHTML = `
     <div class="legend-title">Map View</div>
-    <div class="legend-note">Turn on a layer from the control panel to view symbology.</div>
+    <div class="legend-note">Turn on a layer from the control panel.</div>
   `;
 }
 
@@ -617,9 +597,8 @@ function wireToggle(id, onEnable, onDisable) {
   if (!el) return;
 
   el.addEventListener("change", async (e) => {
-    const checked = e.target.checked;
     try {
-      if (checked) {
+      if (e.target.checked) {
         await onEnable();
       } else {
         onDisable();
@@ -635,40 +614,28 @@ function wireToggle(id, onEnable, onDisable) {
 }
 
 async function enableSolar() {
-  if (!solarLayer) {
-    await loadSolarLayer();
-  } else {
-    addLayerToMap(solarLayer);
-  }
+  if (!solarLayer) await loadSolarLayer();
+  else addLayerToMap(solarLayer);
 }
 
 async function enableEV() {
-  if (!evLayer) {
-    await loadEVLayer();
-  }
+  if (!evLayer) await loadEVLayer();
   addLayerToMap(evLayer);
 }
 
 async function enableHotspots() {
-  if (!hotspotLayer) {
-    await loadHotspotLayer();
-  }
+  if (!hotspotLayer) await loadHotspotLayer();
   addLayerToMap(hotspotLayer);
 }
 
 async function enableLISA() {
-  if (!lisaLayer) {
-    await loadLISALayer();
-  }
+  if (!lisaLayer) await loadLISALayer();
   addLayerToMap(lisaLayer);
 }
 
 async function enableBoundary() {
-  if (!boundaryLayer) {
-    await loadBoundary();
-  } else if (!map.hasLayer(boundaryLayer)) {
-    boundaryLayer.addTo(map);
-  }
+  if (!boundaryLayer) await loadBoundary();
+  else if (!map.hasLayer(boundaryLayer)) boundaryLayer.addTo(map);
   keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
