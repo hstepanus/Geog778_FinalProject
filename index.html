@@ -19,6 +19,7 @@
       <div class="app-title">NOVEC Predictive Grid</div>
       <div class="app-subtitle">Clean Energy Adoption Explorer</div>
     </div>
+
     <div class="topbar-right">
       <div class="status-chip">
         <span class="status-dot"></span>
@@ -32,24 +33,31 @@
       <section class="panel">
         <h2 class="panel-title">Map Layers</h2>
         <p class="panel-text">
-          Toggle density, hotspot, and cluster views for clean-energy adoption patterns
-          across the NOVEC service area.
+          Toggle density, hotspot, and cluster views for clean-energy adoption
+          patterns across the NOVEC service area.
         </p>
 
         <div class="toggle-group">
-          <button id="btnSolar" class="toggle-btn is-active">Solar Density</button>
-          <button id="btnEV" class="toggle-btn">EV Density</button>
-          <button id="btnHotspot" class="toggle-btn">Hotspots</button>
-          <button id="btnLISA" class="toggle-btn">LISA Clusters</button>
-          <button id="btnBase" class="toggle-btn">Base Map Only</button>
+          <button id="btnSolar" class="toggle-btn is-active" type="button">Solar Density</button>
+          <button id="btnEV" class="toggle-btn" type="button">EV Density</button>
+          <button id="btnHotspot" class="toggle-btn" type="button">Hotspots</button>
+          <button id="btnLISA" class="toggle-btn" type="button">LISA Clusters</button>
+          <button id="btnBase" class="toggle-btn" type="button">Base Map Only</button>
         </div>
       </section>
 
       <section class="panel">
         <h2 class="panel-title">Overlays</h2>
+
         <div class="switch-row">
           <span class="switch-label">NOVEC Boundary</span>
-          <button id="btnBoundary" class="switch-btn is-on" aria-pressed="true">
+
+          <button
+            id="btnBoundary"
+            class="switch-btn is-on"
+            type="button"
+            aria-pressed="true"
+          >
             <span class="switch-track">
               <span class="switch-thumb"></span>
             </span>
@@ -63,7 +71,7 @@
         <div id="layerLabel" class="current-layer">Solar Adoption Density</div>
       </section>
 
-      <section class="panel chart-panel" id="chartPanel">
+      <section class="panel chart-panel" id="chartPanel" style="display:none;">
         <div class="chart-header">
           <h2 id="chartTitle" class="panel-title">Analysis Chart</h2>
           <button id="closeChartBtn" class="close-btn" type="button">×</button>
