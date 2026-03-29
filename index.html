@@ -18,71 +18,14 @@
       <div class="topbar-title">NOVEC Predictive Grid</div>
       <div class="topbar-subtitle">Clean Energy Adoption Intelligence Dashboard</div>
     </div>
-    <div class="topbar-right">Distributed Energy Planning View</div>
+
+    <div class="topbar-right">
+      <div class="topbar-pill">Distributed Energy Planning View</div>
+    </div>
   </header>
 
   <main class="dashboard">
-    <aside class="sidebar compact">
-      <section class="panel">
-        <div class="panel-header">Layer Controls</div>
-        <div class="panel-body">
-
-          <div class="toggle-group">
-            <div class="toggle-row">
-              <span class="toggle-label neutral">Base Map</span>
-              <label class="switch">
-                <input type="checkbox" id="toggleBaseMap">
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <div class="toggle-row">
-              <span class="toggle-label solar">Solar Density</span>
-              <label class="switch">
-                <input type="checkbox" id="toggleSolar" checked>
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <div class="toggle-row">
-              <span class="toggle-label boundary">NOVEC Boundary</span>
-              <label class="switch">
-                <input type="checkbox" id="toggleBoundaryLayer" checked>
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <div class="toggle-row">
-              <span class="toggle-label ev">EV Density</span>
-              <label class="switch">
-                <input type="checkbox" id="toggleEV">
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <div class="toggle-row">
-              <span class="toggle-label hotspot">Hotspots</span>
-              <label class="switch">
-                <input type="checkbox" id="toggleHotspots">
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <div class="toggle-row">
-              <span class="toggle-label lisa">LISA Clusters</span>
-              <label class="switch">
-                <input type="checkbox" id="toggleLISA">
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div>
-
-          <div class="sidebar-note">
-            One analytical surface is shown at a time. Boundary can remain on as a reference overlay.
-          </div>
-        </div>
-      </section>
-
+    <aside class="sidebar">
       <section class="panel">
         <div class="panel-header">Summary Metrics</div>
         <div class="panel-body">
@@ -90,47 +33,111 @@
             <div class="metric-card solar">
               <div class="metric-label">Solar in NOVEC</div>
               <div class="metric-value">2210</div>
+              <div class="metric-note">Grid-based solar customer total</div>
             </div>
 
             <div class="metric-card ev">
               <div class="metric-label">EV Accounts</div>
               <div class="metric-value">2401</div>
+              <div class="metric-note">Estimated EV account total</div>
             </div>
 
             <div class="metric-card charger">
-              <div class="metric-label">Chargers</div>
+              <div class="metric-label">Superchargers</div>
               <div class="metric-value">1126</div>
+              <div class="metric-note">Infrastructure reference count</div>
             </div>
 
             <div class="metric-card primary">
-              <div class="metric-label">Current View</div>
-              <div class="metric-value metric-small" id="activeMetric">Solar Density</div>
+              <div class="metric-label">Primary View</div>
+              <div class="metric-value metric-small" id="activeViewText">Solar Density</div>
+              <div class="metric-note">Current analytical layer</div>
             </div>
           </div>
         </div>
       </section>
 
       <section class="panel">
-        <div class="panel-header">Insights</div>
+        <div class="panel-header">Layer Controls</div>
         <div class="panel-body">
-          <div class="button-stack">
-            <button class="btn btn-secondary" onclick="showChart('./static/ev_purchase_trend_chart.png', 'EV Purchase Trends')">
-              EV Purchase Trends
-            </button>
+          <div class="toggle-group">
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-dot dot-solar"></span>
+                <span class="toggle-label">Solar Density</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggleSolar" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
 
-            <button class="btn btn-secondary" onclick="showChart('./static/ev_underserved_zip_chart.png', 'Underserved ZIPs')">
-              Underserved ZIPs
-            </button>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-dot dot-ev"></span>
+                <span class="toggle-label">EV Density</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggleEV" />
+                <span class="slider"></span>
+              </label>
+            </div>
 
-            <button class="btn btn-secondary" onclick="showChart('./static/solar_ev_overlap_zip_chart.png', 'Solar + EV Overlap')">
-              Solar + EV Overlap
-            </button>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-dot dot-hotspot"></span>
+                <span class="toggle-label">Hotspots</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggleHotspots" />
+                <span class="slider"></span>
+              </label>
+            </div>
 
-            <button class="btn btn-secondary" onclick="showChart('./static/yearly_adoption_trends.png', 'Yearly Adoption Trends')">
-              Yearly Adoption Trends
-            </button>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-dot dot-lisa"></span>
+                <span class="toggle-label">LISA Clusters</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggleLISA" />
+                <span class="slider"></span>
+              </label>
+            </div>
 
-            <button class="btn btn-neutral" onclick="hideChart()">Hide Chart</button>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-dot dot-boundary"></span>
+                <span class="toggle-label">NOVEC Boundary</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggleBoundary" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="sidebar-note">
+            Solar, EV, Hotspots, and LISA can be turned on independently. The boundary remains available as a reference overlay for executive review.
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">Analytical Notes</div>
+        <div class="panel-body">
+          <div class="info-box">
+            <div class="info-title">Map Intent</div>
+            <div class="info-text">
+              This dashboard highlights where clean-energy adoption is concentrated, where spatial clustering appears strongest, and where planning attention may be needed.
+            </div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-title">Interpretation</div>
+            <div class="info-text">
+              Hotspots show concentrated EV-related intensity. LISA separates cluster cores from spatial outliers, helping distinguish stable patterns from edge effects.
+            </div>
           </div>
         </div>
       </section>
@@ -138,19 +145,19 @@
 
     <section class="map-shell">
       <div class="map-title-box">
-        <div class="map-title-main" id="layerLabel">Solar Adoption Density</div>
+        <div class="map-title-main" id="layerLabel">Solar Density</div>
         <div class="map-title-sub">Northern Virginia electric cooperative service territory</div>
+      </div>
+
+      <div class="map-badge-stack">
+        <div class="map-badge">PostGIS Analysis</div>
+        <div class="map-badge">Leaflet Dashboard</div>
       </div>
 
       <div id="map"></div>
 
-      <div class="chart-panel" id="chartPanel">
-        <div class="chart-title" id="chartTitle">Chart</div>
-        <img id="chartImage" src="" alt="Chart preview" />
-      </div>
-
       <div class="footer-note">
-        Data Source: NOVEC Service Area • Analysis: PostgreSQL/PostGIS • Web Map: Leaflet
+        Data Source: NOVEC Service Area • Analysis: PostgreSQL/PostGIS • Visualization: Leaflet
       </div>
     </section>
   </main>
