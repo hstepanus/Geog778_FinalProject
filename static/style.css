@@ -41,25 +41,35 @@ html, body {
   height: 100vh;
 }
 
-.info.legend {
-  background: white;
-  padding: 10px 12px;
-  line-height: 18px;
-  color: #333;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-  font-size: 12px;
+.legend{
+  background: rgba(255,255,255,0.95);
+  border-radius:10px;
+  box-shadow:0 6px 16px rgba(0,0,0,.15);
+  border:1px solid #e4ebf3;
+  padding:8px 10px;
+  width:200px;              /* ↓ smaller width */
+  font-size:11px;           /* ↓ smaller text */
 }
 
-.info.legend h4 {
-  margin: 0 0 8px;
-  font-size: 13px;
+.legend-title{
+  font-size:11px;
+  font-weight:600;
+  margin-bottom:6px;
 }
 
-.info.legend i {
-  width: 16px;
-  height: 16px;
-  float: left;
-  margin-right: 8px;
-  opacity: 0.9;
+.legend-scale{
+  height:8px;               /* ↓ thinner bar */
+  border-radius:999px;
+  margin-bottom:4px;
+}
+
+.legend-labels{
+  font-size:10px;
+}
+
+.legend-note{
+  display:none;             /* 🔥 REMOVE clutter */
+}
+.legend{
+  backdrop-filter: blur(6px);
 }
