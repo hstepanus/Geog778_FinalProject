@@ -22,21 +22,20 @@ const dataFiles = {
   boundary: "./static/data/novec_service_area.geojson"
 };
 
-function setActiveViewLabel() {
-  const active = [];
+function safeNumber(value, digits = 2) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n.toFixed(digits) : "0.00";
+}
 
-  if (solarLayer && map.hasLayer(solarLayer)) active.push("Solar Density");
-  if (evLayer && map.hasLayer(evLayer)) active.push("EV Density");
-  if (hotspotLayer && map.hasLayer(hotspotLayer)) active.push("Hotspots");
-  if (lisaLayer && map.hasLayer(lisaLayer)) active.push("LISA Clusters");
-
-  const labelText = active.length ? active.join(" + ") : "Base Map View";
-
-  const label = document.getElementById("layerLabel");
-  const metric = document.getElementById("activeViewText");
-
-  if (label) label.innerText = labelText;
-  if (metric) metric.innerText = labelText;
+function popupHTML(title, rows) {
+  return `
+    <div style="font-size:14px; line-height:1.6; min-width:190px; color:#1f2937;">
+      <div style="font-size:15px; font-weight:800; color:#102b5c; margin-bottom:6px;">
+        ${title}
+      </div>
+      ${rows.join("<br>")}
+    </div>
+  `;
 }
 
 function getSolarColor(d) {
@@ -59,41 +58,83 @@ function getEVDensityColor(d) {
                    "#e5f0ff";
 }
 
-function getHotspotColor(cls) {
-  return cls === "Hot Spot" ? "#d73027" :
-         cls === "Cold Spot" ? "#4575b4" :
-                               "#d9dee7";
+function getHotspotClass(props = {}) {
+  return String(
+    props.hotspot_class ??
+    props.class ??
+    props.hotspot ??
+    props.hotspotClass ??
+    "Neutral"
+  ).trim();
 }
 
-function getLISAColor(cls) {
-  return cls === "High-High" ? "#d73027" :
-         cls === "Low-Low" ? "#4575b4" :
-         cls === "High-Low" ? "#fdae61" :
-         cls === "Low-High" ? "#66bd63" :
-                              "#d9dee7";
+function getLISAClass(props = {}) {
+  return String(
+    props.lisa_cluster ??
+    props.cluster ??
+    props.lisa ??
+    props.lisaClass ??
+    "Not Significant"
+  ).trim();
 }
 
-function popupHTML(title, rows) {
-  return `
-    <div style="font-size:14px; line-height:1.6; min-width:190px; color:#1f2937;">
-      <div style="font-size:15px; font-weight:800; color:#102b5c; margin-bottom:6px;">
-        ${title}
-      </div>
-      ${rows.join("<br>")}
-    </div>
-  `;
+function getHotspotColor(props = {}) {
+  const cls = getHotspotClass(props);
+
+  if (cls === "Hot Spot") return "#d73027";
+  if (cls === "Cold Spot") return "#4575b4";
+  return "#d9dee7";
+}
+
+function getLISAColor(props = {}) {
+  const cls = getLISAClass(props);
+
+  if (cls === "High-High") return "#d73027";
+  if (cls === "Low-Low") return "#4575b4";
+  if (cls === "High-Low") return "#fdae61";
+  if (cls === "Low-High") return "#66bd63";
+  return "#d9dee7";
+}
+
+function setActiveViewLabel() {
+  const active = [];
+
+  if (solarLayer && map.hasLayer(solarLayer)) active.push("Solar Density");
+  if (evLayer && map.hasLayer(evLayer)) active.push("EV Density");
+  if (hotspotLayer && map.hasLayer(hotspotLayer)) active.push("Hotspots");
+  if (lisaLayer && map.hasLayer(lisaLayer)) active.push("LISA Clusters");
+
+  const text = active.length ? active.join(" + ") : "Base Map View";
+
+  const label = document.getElementById("layerLabel");
+  const metric = document.getElementById("activeViewText");
+
+  if (label) label.innerText = text;
+  if (metric) metric.innerText = text;
+}
+
+function keepVisualOrder() {
+  if (solarLayer && map.hasLayer(solarLayer)) solarLayer.bringToBack();
+  if (evLayer && map.hasLayer(evLayer)) evLayer.bringToFront();
+  if (hotspotLayer && map.hasLayer(hotspotLayer)) hotspotLayer.bringToFront();
+  if (lisaLayer && map.hasLayer(lisaLayer)) lisaLayer.bringToFront();
+  if (boundaryLayer && map.hasLayer(boundaryLayer)) boundaryLayer.bringToFront();
 }
 
 function highlightFeature(e) {
   const layer = e.target;
   layer.setStyle({
-    weight: 1.8,
+    weight: 1.5,
     color: "#111827",
-    fillOpacity: 0.95
+    fillOpacity: 1
   });
 
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
+  }
+
+  if (boundaryLayer && map.hasLayer(boundaryLayer)) {
+    boundaryLayer.bringToFront();
   }
 }
 
@@ -101,13 +142,11 @@ function resetFeatureStyle(e) {
   const layer = e.target;
 
   if (solarLayer && solarLayer.hasLayer(layer)) solarLayer.resetStyle(layer);
-  else if (evLayer && evLayer.hasLayer(layer)) evLayer.resetStyle(layer);
-  else if (hotspotLayer && hotspotLayer.hasLayer(layer)) hotspotLayer.resetStyle(layer);
-  else if (lisaLayer && lisaLayer.hasLayer(layer)) lisaLayer.resetStyle(layer);
+  if (evLayer && evLayer.hasLayer(layer)) evLayer.resetStyle(layer);
+  if (hotspotLayer && hotspotLayer.hasLayer(layer)) hotspotLayer.resetStyle(layer);
+  if (lisaLayer && lisaLayer.hasLayer(layer)) lisaLayer.resetStyle(layer);
 
-  if (boundaryLayer && map.hasLayer(boundaryLayer)) {
-    boundaryLayer.bringToFront();
-  }
+  keepVisualOrder();
 }
 
 function zoomToFeature(e) {
@@ -125,10 +164,8 @@ function bindInteractiveEvents(layer) {
 function addLayerToMap(layer) {
   if (layer && !map.hasLayer(layer)) {
     layer.addTo(map);
-    if (boundaryLayer && map.hasLayer(boundaryLayer)) {
-      boundaryLayer.bringToFront();
-    }
   }
+  keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
 }
@@ -137,16 +174,9 @@ function removeLayerFromMap(layer) {
   if (layer && map.hasLayer(layer)) {
     map.removeLayer(layer);
   }
-  if (boundaryLayer && map.hasLayer(boundaryLayer)) {
-    boundaryLayer.bringToFront();
-  }
+  keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
-}
-
-function safeNumber(value, digits = 2) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n.toFixed(digits) : "0.00";
 }
 
 function loadSolarLayer() {
@@ -158,10 +188,10 @@ function loadSolarLayer() {
     .then(data => {
       solarLayer = L.geoJSON(data, {
         style: feature => ({
-          fillColor: getSolarColor(Number(feature.properties?.solar_density || 0)),
-          weight: 0.7,
-          color: "#9aa5b5",
-          fillOpacity: 0.82,
+          fillColor: getSolarColor(Number(feature?.properties?.solar_density || 0)),
+          weight: 0.5,
+          color: "#a8b2c0",
+          fillOpacity: 0.55,
           opacity: 1
         }),
         onEachFeature: (feature, layer) => {
@@ -198,10 +228,10 @@ function loadEVLayer() {
     .then(data => {
       evLayer = L.geoJSON(data, {
         style: feature => ({
-          fillColor: getEVDensityColor(Number(feature.properties?.ev_density || 0)),
-          weight: 0.7,
-          color: "#96aac8",
-          fillOpacity: 0.78,
+          fillColor: getEVDensityColor(Number(feature?.properties?.ev_density || 0)),
+          weight: 0.5,
+          color: "#9ab0cf",
+          fillOpacity: 0.72,
           opacity: 1
         }),
         onEachFeature: (feature, layer) => {
@@ -231,10 +261,10 @@ function loadHotspotLayer() {
     .then(data => {
       hotspotLayer = L.geoJSON(data, {
         style: feature => ({
-          fillColor: getHotspotColor(feature.properties?.hotspot_class),
-          weight: 0.7,
-          color: "#9ca5b1",
-          fillOpacity: 0.78,
+          fillColor: getHotspotColor(feature.properties || {}),
+          weight: 0.35,
+          color: "#ffffff",
+          fillOpacity: 0.9,
           opacity: 1
         }),
         onEachFeature: (feature, layer) => {
@@ -242,7 +272,7 @@ function loadHotspotLayer() {
           layer.bindPopup(
             popupHTML("Hotspot Analysis", [
               `<strong>Grid ID:</strong> ${p.grid_id ?? "N/A"}`,
-              `<strong>Class:</strong> ${p.hotspot_class ?? "Neutral"}`
+              `<strong>Class:</strong> ${getHotspotClass(p)}`
             ])
           );
           bindInteractiveEvents(layer);
@@ -262,12 +292,14 @@ function loadLISALayer() {
       return r.json();
     })
     .then(data => {
+      console.log("LISA sample properties:", data?.features?.[0]?.properties);
+
       lisaLayer = L.geoJSON(data, {
         style: feature => ({
-          fillColor: getLISAColor(feature.properties?.lisa_cluster),
-          weight: 0.7,
-          color: "#9ca5b1",
-          fillOpacity: 0.78,
+          fillColor: getLISAColor(feature.properties || {}),
+          weight: 0.35,
+          color: "#ffffff",
+          fillOpacity: 0.92,
           opacity: 1
         }),
         onEachFeature: (feature, layer) => {
@@ -275,7 +307,7 @@ function loadLISALayer() {
           layer.bindPopup(
             popupHTML("LISA Cluster", [
               `<strong>Grid ID:</strong> ${p.grid_id ?? "N/A"}`,
-              `<strong>Cluster:</strong> ${p.lisa_cluster ?? "Not Significant"}`
+              `<strong>Cluster:</strong> ${getLISAClass(p)}`
             ])
           );
           bindInteractiveEvents(layer);
@@ -298,21 +330,19 @@ function loadBoundary() {
       boundaryLayer = L.geoJSON(data, {
         style: {
           color: "#123d87",
-          weight: 2.4,
+          weight: 2.2,
           opacity: 1,
           fill: false,
           dashArray: "4,4"
         },
         onEachFeature: (feature, layer) => {
           layer.bindPopup(
-            popupHTML("NOVEC Service Area", [
-              `Boundary reference overlay`
-            ])
+            popupHTML("NOVEC Service Area", ["Boundary reference overlay"])
           );
         }
       }).addTo(map);
 
-      boundaryLayer.bringToFront();
+      keepVisualOrder();
       setActiveViewLabel();
       updateLegend();
     })
@@ -349,6 +379,7 @@ function updateLegend() {
       <div class="legend-row"><span class="legend-swatch" style="background:#4575b4"></span>Low-Low</div>
       <div class="legend-row"><span class="legend-swatch" style="background:#fdae61"></span>High-Low</div>
       <div class="legend-row"><span class="legend-swatch" style="background:#66bd63"></span>Low-High</div>
+      <div class="legend-row"><span class="legend-swatch" style="background:#d9dee7"></span>Not Significant</div>
     `;
     return;
   }
@@ -401,6 +432,7 @@ function wireToggle(id, onEnable, onDisable) {
       } else {
         onDisable();
       }
+      keepVisualOrder();
       setActiveViewLabel();
       updateLegend();
     } catch (err) {
@@ -438,11 +470,13 @@ async function enableLISA() {
   addLayerToMap(lisaLayer);
 }
 
-function enableBoundary() {
-  if (boundaryLayer && !map.hasLayer(boundaryLayer)) {
+async function enableBoundary() {
+  if (!boundaryLayer) {
+    await loadBoundary();
+  } else if (!map.hasLayer(boundaryLayer)) {
     boundaryLayer.addTo(map);
-    boundaryLayer.bringToFront();
   }
+  keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
 }
@@ -459,7 +493,7 @@ wireToggle("toggleSolar", enableSolar, () => removeLayerFromMap(solarLayer));
 wireToggle("toggleEV", enableEV, () => removeLayerFromMap(evLayer));
 wireToggle("toggleHotspots", enableHotspots, () => removeLayerFromMap(hotspotLayer));
 wireToggle("toggleLISA", enableLISA, () => removeLayerFromMap(lisaLayer));
-wireToggle("toggleBoundary", async () => enableBoundary(), () => disableBoundary());
+wireToggle("toggleBoundary", enableBoundary, disableBoundary);
 
 async function initializeDashboard() {
   await Promise.all([
@@ -486,6 +520,7 @@ async function initializeDashboard() {
   if (toggleLISA) toggleLISA.checked = false;
   if (toggleBoundary) toggleBoundary.checked = true;
 
+  keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
 }
