@@ -14,6 +14,11 @@ let hotspotLayer = null;
 let lisaLayer = null;
 let boundaryLayer = null;
 
+let solarData = null;
+let evData = null;
+let hotspotData = null;
+let lisaData = null;
+
 const dataFiles = {
   solar: "./static/data/solar_grid.geojson",
   ev: "./static/data/ev_grid.geojson",
@@ -25,6 +30,11 @@ const dataFiles = {
 function safeNumber(value, digits = 2) {
   const n = Number(value);
   return Number.isFinite(n) ? n.toFixed(digits) : "0.00";
+}
+
+function safeInt(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.round(n).toLocaleString() : "0";
 }
 
 function popupHTML(title, rows) {
@@ -166,6 +176,7 @@ function addLayerToMap(layer) {
   keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
+  updateAnalysisPanel();
 }
 
 function removeLayerFromMap(layer) {
@@ -175,6 +186,167 @@ function removeLayerFromMap(layer) {
   keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
+  updateAnalysisPanel();
+}
+
+function layerIsVisible(layer) {
+  return !!(layer && map.hasLayer(layer));
+}
+
+function getActiveLayerName() {
+  if (layerIsVisible(lisaLayer)) return "lisa";
+  if (layerIsVisible(hotspotLayer)) return "hotspots";
+  if (layerIsVisible(evLayer)) return "ev";
+  if (layerIsVisible(solarLayer)) return "solar";
+  return "base";
+}
+
+function createStatCard(label, value) {
+  return `
+    <div class="analysis-stat">
+      <div class="analysis-stat-label">${label}</div>
+      <div class="analysis-stat-value">${value}</div>
+    </div>
+  `;
+}
+
+function mean(values) {
+  if (!values.length) return 0;
+  return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
+function countBy(features, getter) {
+  const counts = {};
+  features.forEach(f => {
+    const key = getter(f);
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  return counts;
+}
+
+function topValue(features, getter) {
+  let top = null;
+  features.forEach(f => {
+    const val = Number(getter(f));
+    if (!Number.isFinite(val)) return;
+    if (!top || val > top.value) {
+      top = {
+        value: val,
+        gridId: f?.properties?.grid_id ?? "N/A"
+      };
+    }
+  });
+  return top;
+}
+
+function updateAnalysisPanel() {
+  const titleEl = document.getElementById("analysisTitle");
+  const subtitleEl = document.getElementById("analysisSubtitle");
+  const gridEl = document.getElementById("analysisGrid");
+  const insightEl = document.getElementById("analysisInsight");
+
+  if (!titleEl || !subtitleEl || !gridEl || !insightEl) return;
+
+  const active = getActiveLayerName();
+
+  if (active === "solar" && solarData?.features?.length) {
+    const features = solarData.features;
+    const densities = features
+      .map(f => Number(f?.properties?.solar_density))
+      .filter(Number.isFinite);
+    const counts = features
+      .map(f => Number(f?.properties?.solar_count))
+      .filter(Number.isFinite);
+    const top = topValue(features, f => f?.properties?.solar_density);
+
+    titleEl.innerText = "Solar Analytical Summary";
+    subtitleEl.innerText = "Grid-based adoption surface";
+    gridEl.innerHTML = [
+      createStatCard("Grid Cells", safeInt(features.length)),
+      createStatCard("Mean Density", safeNumber(mean(densities))),
+      createStatCard("Total Solar", safeInt(counts.reduce((a, b) => a + b, 0))),
+      createStatCard("Top Grid", top ? `#${top.gridId}` : "N/A")
+    ].join("");
+
+    insightEl.innerText = top
+      ? `Highest solar density appears in grid ${top.gridId} at approximately ${safeNumber(top.value)} installs per km², indicating one of the strongest local adoption concentrations in the service territory.`
+      : "Solar density metrics are available once the layer is loaded.";
+    return;
+  }
+
+  if (active === "ev" && evData?.features?.length) {
+    const features = evData.features;
+    const densities = features
+      .map(f => Number(f?.properties?.ev_density))
+      .filter(Number.isFinite);
+    const top = topValue(features, f => f?.properties?.ev_density);
+
+    titleEl.innerText = "EV Analytical Summary";
+    subtitleEl.innerText = "Weighted EV density surface";
+    gridEl.innerHTML = [
+      createStatCard("Grid Cells", safeInt(features.length)),
+      createStatCard("Mean Density", safeNumber(mean(densities))),
+      createStatCard("Max Density", top ? safeNumber(top.value) : "0.00"),
+      createStatCard("Top Grid", top ? `#${top.gridId}` : "N/A")
+    ].join("");
+
+    insightEl.innerText = top
+      ? `Grid ${top.gridId} has the highest estimated EV density at ${safeNumber(top.value)} per km², suggesting a strong candidate area for infrastructure planning, outreach, or localized grid-readiness review.`
+      : "EV density metrics are available once the layer is loaded.";
+    return;
+  }
+
+  if (active === "hotspots" && hotspotData?.features?.length) {
+    const features = hotspotData.features;
+    const counts = countBy(features, f => getHotspotClass(f.properties || {}));
+    const hot = counts["Hot Spot"] || 0;
+    const cold = counts["Cold Spot"] || 0;
+    const neutral = counts["Neutral"] || 0;
+
+    titleEl.innerText = "Hotspot Analytical Summary";
+    subtitleEl.innerText = "Local spatial concentration classes";
+    gridEl.innerHTML = [
+      createStatCard("Hot Spots", safeInt(hot)),
+      createStatCard("Cold Spots", safeInt(cold)),
+      createStatCard("Neutral", safeInt(neutral)),
+      createStatCard("Total Cells", safeInt(features.length))
+    ].join("");
+
+    insightEl.innerText = `The hotspot layer separates concentrated EV-related intensity from relatively weak local concentration. Hot spots (${safeInt(hot)}) indicate stronger local clustering, while cold spots (${safeInt(cold)}) indicate weaker surrounding density patterns.`;
+    return;
+  }
+
+  if (active === "lisa" && lisaData?.features?.length) {
+    const features = lisaData.features;
+    const counts = countBy(features, f => getLISAClass(f.properties || {}));
+    const hh = counts["High-High"] || 0;
+    const ll = counts["Low-Low"] || 0;
+    const hl = counts["High-Low"] || 0;
+    const lh = counts["Low-High"] || 0;
+
+    titleEl.innerText = "LISA Analytical Summary";
+    subtitleEl.innerText = "Cluster cores and spatial outliers";
+    gridEl.innerHTML = [
+      createStatCard("High-High", safeInt(hh)),
+      createStatCard("Low-Low", safeInt(ll)),
+      createStatCard("High-Low", safeInt(hl)),
+      createStatCard("Low-High", safeInt(lh))
+    ].join("");
+
+    insightEl.innerText = `High-High clusters (${safeInt(hh)}) indicate stable local adoption cores, while High-Low (${safeInt(hl)}) and Low-High (${safeInt(lh)}) cells identify spatial outliers that may reflect edge conditions, transition zones, or uneven local diffusion.`;
+    return;
+  }
+
+  titleEl.innerText = "Analytical Summary";
+  subtitleEl.innerText = "Active layer metrics";
+  gridEl.innerHTML = [
+    createStatCard("Solar", "Off"),
+    createStatCard("EV", "Off"),
+    createStatCard("Hotspots", "Off"),
+    createStatCard("LISA", "Off")
+  ].join("");
+
+  insightEl.innerText = "Turn on a layer to see analytical context, summary counts, and an executive interpretation of the active map view.";
 }
 
 function loadSolarLayer() {
@@ -184,6 +356,7 @@ function loadSolarLayer() {
       return r.json();
     })
     .then(data => {
+      solarData = data;
       solarLayer = L.geoJSON(data, {
         style: feature => ({
           fillColor: getSolarColor(Number(feature?.properties?.solar_density || 0)),
@@ -224,6 +397,7 @@ function loadEVLayer() {
       return r.json();
     })
     .then(data => {
+      evData = data;
       evLayer = L.geoJSON(data, {
         style: feature => ({
           fillColor: getEVDensityColor(Number(feature?.properties?.ev_density || 0)),
@@ -257,6 +431,7 @@ function loadHotspotLayer() {
       return r.json();
     })
     .then(data => {
+      hotspotData = data;
       hotspotLayer = L.geoJSON(data, {
         style: feature => ({
           fillColor: getHotspotColor(feature.properties || {}),
@@ -290,8 +465,7 @@ function loadLISALayer() {
       return r.json();
     })
     .then(data => {
-      console.log("LISA sample properties:", data?.features?.[0]?.properties);
-
+      lisaData = data;
       lisaLayer = L.geoJSON(data, {
         style: feature => ({
           fillColor: getLISAColor(feature.properties || {}),
@@ -343,6 +517,7 @@ function loadBoundary() {
       keepVisualOrder();
       setActiveViewLabel();
       updateLegend();
+      updateAnalysisPanel();
     })
     .catch(err => {
       console.error(err);
@@ -452,6 +627,7 @@ function wireToggle(id, onEnable, onDisable) {
       keepVisualOrder();
       setActiveViewLabel();
       updateLegend();
+      updateAnalysisPanel();
     } catch (err) {
       console.error(err);
     }
@@ -496,6 +672,7 @@ async function enableBoundary() {
   keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
+  updateAnalysisPanel();
 }
 
 function disableBoundary() {
@@ -504,6 +681,7 @@ function disableBoundary() {
   }
   setActiveViewLabel();
   updateLegend();
+  updateAnalysisPanel();
 }
 
 wireToggle("toggleSolar", enableSolar, () => removeLayerFromMap(solarLayer));
@@ -540,6 +718,7 @@ async function initializeDashboard() {
   keepVisualOrder();
   setActiveViewLabel();
   updateLegend();
+  updateAnalysisPanel();
 }
 
 initializeDashboard();
