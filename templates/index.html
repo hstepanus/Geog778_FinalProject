@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NOVEC Predictive Grid</title>
-
+<div class="subtitle">
+Clean Energy Adoption Intelligence Dashboard
+</div>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
     <style>
@@ -320,9 +322,9 @@
 <div class="topbar">
     <div class="topbar-left">
         <div class="topbar-title">NOVEC Predictive Grid</div>
-        <div class="topbar-subtitle">Distributed Energy Adoption Explorer • Executive Mockup</div>
+        <div class="topbar-subtitle">Distributed Energy Adoption Explorer</div>
     </div>
-    <div class="topbar-badge">Peer Testing Build</div>
+   
 </div>
 
 <div class="layout">
@@ -353,7 +355,7 @@
         </div>
 
         <div class="panel">
-            <div class="panel-header">Layer Controls</div>
+            <div class="panel-header">Data Layers</div>
             <div class="panel-body">
                 <div class="sidebar-section-label">Switch between available and placeholder analytical views.</div>
 
@@ -373,7 +375,7 @@
         </div>
 
         <div class="panel">
-            <div class="panel-header">Charts</div>
+            <div class="panel-header">Insights & Analytics</div>
             <div class="panel-body">
                 <button class="btn btn-secondary" onclick="showChart('{{ url_for('static', filename='ev_purchase_trend_chart.png') }}', 'EV Purchase Trends')">
                     EV Purchase Trends
