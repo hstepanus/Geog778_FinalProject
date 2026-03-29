@@ -11,111 +11,69 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
-  <link rel="stylesheet" href="./static/style.css" />
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-left">
-      <div class="topbar-title">NOVEC Predictive Grid</div>
-      <div class="topbar-subtitle">Clean Energy Adoption Intelligence Dashboard</div>
+      <div class="app-title">NOVEC Predictive Grid</div>
+      <div class="app-subtitle">Clean Energy Adoption Explorer</div>
     </div>
-    <div class="topbar-right">Distributed Energy Planning View</div>
+    <div class="topbar-right">
+      <div class="status-chip">
+        <span class="status-dot"></span>
+        Interactive Spatial Dashboard
+      </div>
+    </div>
   </header>
 
-  <main class="dashboard">
+  <main class="app-shell">
     <aside class="sidebar">
       <section class="panel">
-        <div class="panel-header">Summary Metrics</div>
-        <div class="panel-body">
-          <div class="metric-grid">
-            <div class="metric-card solar">
-              <div class="metric-label">Solar in NOVEC</div>
-              <div class="metric-value">2210</div>
-              <div class="metric-note">Spatially clipped to service territory</div>
-            </div>
+        <h2 class="panel-title">Map Layers</h2>
+        <p class="panel-text">
+          Toggle density, hotspot, and cluster views for clean-energy adoption patterns
+          across the NOVEC service area.
+        </p>
 
-            <div class="metric-card ev">
-              <div class="metric-label">EV Accounts</div>
-              <div class="metric-value">2401</div>
-              <div class="metric-note">Current raw account total</div>
-            </div>
-
-            <div class="metric-card charger">
-              <div class="metric-label">Chargers</div>
-              <div class="metric-value">1126</div>
-              <div class="metric-note">Current raw infrastructure total</div>
-            </div>
-
-            <div class="metric-card primary">
-              <div class="metric-label">Primary Spatial Layer</div>
-              <div class="metric-value metric-small">Solar Density</div>
-              <div class="metric-note">Grid-based analytical surface</div>
-            </div>
-          </div>
+        <div class="toggle-group">
+          <button id="btnSolar" class="toggle-btn is-active">Solar Density</button>
+          <button id="btnEV" class="toggle-btn">EV Density</button>
+          <button id="btnHotspot" class="toggle-btn">Hotspots</button>
+          <button id="btnLISA" class="toggle-btn">LISA Clusters</button>
+          <button id="btnBase" class="toggle-btn">Base Map Only</button>
         </div>
       </section>
 
       <section class="panel">
-        <div class="panel-header">Data Layers</div>
-        <div class="panel-body">
-          <div class="button-stack">
-            <button class="btn btn-neutral" onclick="showBaseMap()">Base Map</button>
-            <button class="btn btn-solar" onclick="showSolarDensity()">Solar Adoption Density</button>
-            <button class="btn btn-boundary" onclick="toggleBoundary()">NOVEC Boundary</button>
-            <button class="btn btn-ev" onclick="showPlaceholderLayer('EV Adoption Density')">EV Adoption Density</button>
-            <button class="btn btn-hotspot" onclick="showPlaceholderLayer('Statistically Significant Hotspots')">Statistically Significant Hotspots</button>
-            <button class="btn btn-lisa" onclick="showPlaceholderLayer('Spatial Clusters (LISA)')">Spatial Clusters (LISA)</button>
-          </div>
-
-          <div class="sidebar-note">
-            Solar Adoption Density is connected to spatial analysis output exported from PostGIS as GeoJSON.
-            The NOVEC service area boundary is displayed as a reference overlay.
-          </div>
+        <h2 class="panel-title">Overlays</h2>
+        <div class="switch-row">
+          <span class="switch-label">NOVEC Boundary</span>
+          <button id="btnBoundary" class="switch-btn is-on" aria-pressed="true">
+            <span class="switch-track">
+              <span class="switch-thumb"></span>
+            </span>
+            <span class="switch-text">ON</span>
+          </button>
         </div>
       </section>
 
       <section class="panel">
-        <div class="panel-header">Insights & Analytics</div>
-        <div class="panel-body">
-          <div class="button-stack">
-            <button class="btn btn-secondary" onclick="showChart('./static/ev_purchase_trend_chart.png', 'EV Purchase Trends')">
-              EV Purchase Trends
-            </button>
+        <h2 class="panel-title">Current View</h2>
+        <div id="layerLabel" class="current-layer">Solar Adoption Density</div>
+      </section>
 
-            <button class="btn btn-secondary" onclick="showChart('./static/ev_underserved_zip_chart.png', 'Underserved ZIPs')">
-              Underserved ZIPs
-            </button>
-
-            <button class="btn btn-secondary" onclick="showChart('./static/solar_ev_overlap_zip_chart.png', 'Solar + EV Overlap')">
-              Solar + EV Overlap
-            </button>
-
-            <button class="btn btn-secondary" onclick="showChart('./static/yearly_adoption_trends.png', 'Yearly Adoption Trends')">
-              Yearly Adoption Trends
-            </button>
-
-            <button class="btn btn-neutral" onclick="hideChart()">Hide Chart</button>
-          </div>
+      <section class="panel chart-panel" id="chartPanel">
+        <div class="chart-header">
+          <h2 id="chartTitle" class="panel-title">Analysis Chart</h2>
+          <button id="closeChartBtn" class="close-btn" type="button">×</button>
         </div>
+        <img id="chartImage" src="" alt="Analysis chart" />
       </section>
     </aside>
 
-    <section class="map-shell">
-      <div class="map-title-box">
-        <div class="map-title-main" id="layerLabel">Solar Adoption Density</div>
-        <div class="map-title-sub">Northern Virginia electric cooperative service territory</div>
-      </div>
-
+    <section class="map-section">
       <div id="map"></div>
-
-      <div class="chart-panel" id="chartPanel">
-        <div class="chart-title" id="chartTitle">Chart</div>
-        <img id="chartImage" src="" alt="Chart preview" />
-      </div>
-
-      <div class="footer-note">
-        Data Source: NOVEC Service Area • Analysis: PostgreSQL/PostGIS • Web Map: Leaflet
-      </div>
     </section>
   </main>
 
@@ -124,6 +82,6 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
-  <script src="./static/app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
