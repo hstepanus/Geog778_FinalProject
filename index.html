@@ -124,6 +124,33 @@
       </section>
 
       <section class="panel">
+        <div class="panel-header">Charts & Trends</div>
+        <div class="panel-body">
+          <div class="chart-button-stack">
+            <button class="chart-btn" onclick="showChart('./static/ev_purchase_trend_chart.png', 'EV Purchase Trends')">
+              EV Purchase Trends
+            </button>
+
+            <button class="chart-btn" onclick="showChart('./static/ev_underserved_zip_chart.png', 'Underserved ZIPs')">
+              Underserved ZIPs
+            </button>
+
+            <button class="chart-btn" onclick="showChart('./static/solar_ev_overlap_zip_chart.png', 'Solar + EV Overlap')">
+              Solar + EV Overlap
+            </button>
+
+            <button class="chart-btn" onclick="showChart('./static/yearly_adoption_trends.png', 'Yearly Adoption Trends')">
+              Yearly Adoption Trends
+            </button>
+
+            <button class="chart-btn chart-btn-light" onclick="hideChart()">
+              Hide Chart
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
         <div class="panel-header">Analytical Notes</div>
         <div class="panel-body">
           <div class="info-box">
@@ -155,6 +182,14 @@
       </div>
 
       <div id="map"></div>
+
+      <div class="chart-panel" id="chartPanel">
+        <div class="chart-panel-header">
+          <div class="chart-panel-title" id="chartTitle">Chart</div>
+          <button class="chart-close-btn" onclick="hideChart()">×</button>
+        </div>
+        <img id="chartImage" src="" alt="Chart preview" />
+      </div>
 
       <div class="footer-note">
         Data Source: NOVEC Service Area • Analysis: PostgreSQL/PostGIS • Visualization: Leaflet

@@ -80,7 +80,6 @@ function getLISAClass(props = {}) {
 
 function getHotspotColor(props = {}) {
   const cls = getHotspotClass(props);
-
   if (cls === "Hot Spot") return "#d73027";
   if (cls === "Cold Spot") return "#4575b4";
   return "#d9dee7";
@@ -88,7 +87,6 @@ function getHotspotColor(props = {}) {
 
 function getLISAColor(props = {}) {
   const cls = getLISAClass(props);
-
   if (cls === "High-High") return "#d73027";
   if (cls === "Low-Low") return "#4575b4";
   if (cls === "High-Low") return "#fdae61";
@@ -350,6 +348,25 @@ function loadBoundary() {
       console.error(err);
       alert("Boundary layer could not be loaded.");
     });
+}
+
+function showChart(imagePath, title) {
+  const panel = document.getElementById("chartPanel");
+  const image = document.getElementById("chartImage");
+  const text = document.getElementById("chartTitle");
+
+  if (!panel || !image || !text) return;
+
+  panel.style.display = "block";
+  image.src = imagePath;
+  text.innerText = title;
+}
+
+function hideChart() {
+  const panel = document.getElementById("chartPanel");
+  if (panel) {
+    panel.style.display = "none";
+  }
 }
 
 const legend = L.control({ position: "bottomright" });
