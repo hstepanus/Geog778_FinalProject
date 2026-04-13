@@ -536,7 +536,7 @@ legend.onAdd = function () {
   return div;
 };
 
-legend.addTo(map);
+//legend.addTo(map);
 
 function updateLegend() {
   const div = document.getElementById("mapLegend");

@@ -668,4 +668,34 @@ body{
   .chart-panel{
     width:calc(100% - 36px);
   }
+}.analysis-legend{
+  margin-top:10px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:#f8fbff;
+  border:1px solid #e4ebf3;
+}
+
+.analysis-legend .legend-title{
+  font-size:11px;
+  font-weight:800;
+  color:var(--navy-dark);
+  margin-bottom:6px;
+}
+
+/* Solar gradient color */
+.solar-gradient{
+  height:6px;
+  border-radius:999px;
+  background:linear-gradient(to right, #f6e8c3, #f4a62a, #d94242);
+  border:1px solid #d7dde6;
+  margin-bottom:5px;
+}
+
+.analysis-legend .legend-labels{
+  display:flex;
+  justify-content:space-between;
+  font-size:9px;
+  font-weight:700;
+  color:var(--muted);
 }
