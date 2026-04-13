@@ -383,6 +383,7 @@ body{
   color:var(--navy-dark);
 }
 
+/* RIGHT SUMMARY PANEL */
 .analysis-panel{
   position:absolute;
   top:72px;
@@ -390,6 +391,9 @@ body{
   z-index:930;
   width:220px;
   max-width:calc(100% - 32px);
+  max-height:calc(100% - 110px);
+  overflow-y:auto;
+
   background:rgba(255,255,255,.97);
   border:1px solid #e4ebf3;
   border-radius:16px;
@@ -401,6 +405,15 @@ body{
   flex-direction:column;
   align-items:stretch;
   gap:8px;
+}
+
+.analysis-panel::-webkit-scrollbar{
+  width:6px;
+}
+
+.analysis-panel::-webkit-scrollbar-thumb{
+  background:#cad5e4;
+  border-radius:999px;
 }
 
 .analysis-title{
@@ -454,9 +467,11 @@ body{
   margin-bottom:2px;
 }
 
+/* EMBEDDED LEGEND BELOW INSIGHT */
 .embedded-legend{
   display:block;
-  position:relative;
+  position:sticky;
+  bottom:0;
   margin-top:4px;
   padding:7px 8px;
   border-radius:12px;
@@ -516,6 +531,7 @@ body{
   color:var(--muted);
 }
 
+/* CHART PANEL */
 .chart-panel{
   position:absolute;
   left:18px;
@@ -569,6 +585,7 @@ body{
   border:1px solid #e5ebf2;
 }
 
+/* FOOTER */
 .footer-note{
   position:absolute;
   left:16px;
@@ -583,6 +600,7 @@ body{
   color:var(--muted);
 }
 
+/* LEAFLET OVERRIDES */
 .leaflet-bottom.leaflet-right{
   display:flex;
   flex-direction:column;
@@ -618,6 +636,7 @@ body{
   margin:12px 14px;
 }
 
+/* RESPONSIVE */
 @media (max-width:1100px){
   body{
     overflow:auto;
