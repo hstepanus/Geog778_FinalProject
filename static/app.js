@@ -39,7 +39,7 @@ function safeInt(value) {
 
 function popupHTML(title, rows) {
   return `
-    <div style="font-size:14px; line-height:1.6; min-width:190px; color:#1f2937;">
+    <div style="font-size:14px; line-height:1.6; min-width:180px; color:#1f2937;">
       <div style="font-size:15px; font-weight:800; color:#102b5c; margin-bottom:6px;">
         ${title}
       </div>
@@ -170,7 +170,7 @@ function addLayerToMap(layer) {
   if (layer && !map.hasLayer(layer)) layer.addTo(map);
   keepVisualOrder();
   setActiveViewLabel();
-  updateLegend();
+  updateEmbeddedLegend();
   updateAnalysisPanel();
 }
 
@@ -178,7 +178,7 @@ function removeLayerFromMap(layer) {
   if (layer && map.hasLayer(layer)) map.removeLayer(layer);
   keepVisualOrder();
   setActiveViewLabel();
-  updateLegend();
+  updateEmbeddedLegend();
   updateAnalysisPanel();
 }
 
@@ -232,6 +232,51 @@ function topValue(features, getter) {
   return top;
 }
 
+function updateEmbeddedLegend() {
+  const title = document.querySelector("#embeddedLegend .legend-title");
+  const gradient = document.querySelector("#embeddedLegend .legend-gradient");
+  const note = document.getElementById("embeddedLegendNote");
+
+  if (!title || !gradient || !note) return;
+
+  const active = getActiveLayerName();
+
+  if (active === "solar") {
+    title.innerText = "Solar Density";
+    gradient.className = "legend-gradient solar-gradient";
+    note.innerText = "Grid-based solar adoption density surface.";
+    return;
+  }
+
+  if (active === "ev") {
+    title.innerText = "EV Density";
+    gradient.className = "legend-gradient solar-gradient";
+    gradient.style.background = "linear-gradient(to right,#e5f0ff 0%,#9cc0f8 25%,#5c91ee 50%,#2f6fe4 75%,#0b3b8c 100%)";
+    note.innerText = "Estimated EV density per square kilometer.";
+    return;
+  }
+
+  if (active === "hotspots") {
+    title.innerText = "Hotspots";
+    gradient.className = "legend-gradient";
+    gradient.style.background = "linear-gradient(to right,#4575b4 0%,#d9dee7 50%,#d73027 100%)";
+    note.innerText = "Cold Spot to Hot Spot classes.";
+    return;
+  }
+
+  if (active === "lisa") {
+    title.innerText = "LISA Clusters";
+    gradient.className = "legend-gradient";
+    gradient.style.background = "linear-gradient(to right,#4575b4 0%,#66bd63 33%,#fdae61 66%,#d73027 100%)";
+    note.innerText = "Low-Low, Low-High, High-Low, and High-High classes.";
+    return;
+  }
+
+  title.innerText = "Map Legend";
+  gradient.className = "legend-gradient solar-gradient";
+  note.innerText = "Turn on a layer to view analytical symbology.";
+}
+
 function updateAnalysisPanel() {
   const titleEl = document.getElementById("analysisTitle");
   const subtitleEl = document.getElementById("analysisSubtitle");
@@ -258,7 +303,7 @@ function updateAnalysisPanel() {
     ].join("");
 
     insightEl.innerText = top
-      ? `Highest solar density appears in grid ${top.gridId} at approximately ${safeNumber(top.value)} installs per km².`
+      ? `Highest solar density appears in grid ${top.gridId} at approximately ${safeNumber(top.value)} per km².`
       : "Solar density metrics are available once the layer is loaded.";
     return;
   }
@@ -278,7 +323,7 @@ function updateAnalysisPanel() {
     ].join("");
 
     insightEl.innerText = top
-      ? `Grid ${top.gridId} has the highest estimated EV density at ${safeNumber(top.value)} per km², suggesting a strong candidate area for infrastructure planning.`
+      ? `Grid ${top.gridId} has the highest estimated EV density at ${safeNumber(top.value)} per km².`
       : "EV density metrics are available once the layer is loaded.";
     return;
   }
@@ -500,7 +545,7 @@ function loadBoundary() {
 
       keepVisualOrder();
       setActiveViewLabel();
-      updateLegend();
+      updateEmbeddedLegend();
       updateAnalysisPanel();
     })
     .catch(err => {
@@ -527,71 +572,6 @@ function hideChart() {
   if (panel) panel.style.display = "none";
 }
 
-const legend = L.control({ position: "bottomright" });
-
-legend.onAdd = function () {
-  const div = L.DomUtil.create("div", "legend");
-  div.id = "mapLegend";
-  div.innerHTML = "";
-  return div;
-};
-
-//legend.addTo(map);
-
-function updateLegend() {
-  const div = document.getElementById("mapLegend");
-  if (!div) return;
-
-  const solarVisible = solarLayer && map.hasLayer(solarLayer);
-  const evVisible = evLayer && map.hasLayer(evLayer);
-  const hotspotVisible = hotspotLayer && map.hasLayer(hotspotLayer);
-  const lisaVisible = lisaLayer && map.hasLayer(lisaLayer);
-
-  if (lisaVisible) {
-    div.innerHTML = `
-      <div class="legend-title">LISA Clusters</div>
-      <div class="legend-row"><span class="legend-swatch" style="background:#d73027"></span>High-High</div>
-      <div class="legend-row"><span class="legend-swatch" style="background:#4575b4"></span>Low-Low</div>
-      <div class="legend-row"><span class="legend-swatch" style="background:#fdae61"></span>High-Low</div>
-      <div class="legend-row"><span class="legend-swatch" style="background:#66bd63"></span>Low-High</div>
-    `;
-    return;
-  }
-
-  if (hotspotVisible) {
-    div.innerHTML = `
-      <div class="legend-title">Hotspot Classes</div>
-      <div class="legend-row"><span class="legend-swatch" style="background:#d73027"></span>Hot Spot</div>
-      <div class="legend-row"><span class="legend-swatch" style="background:#4575b4"></span>Cold Spot</div>
-      <div class="legend-row"><span class="legend-swatch" style="background:#d9dee7"></span>Neutral</div>
-    `;
-    return;
-  }
-
-  if (evVisible) {
-    div.innerHTML = `
-      <div class="legend-title">EV Density</div>
-      <div class="legend-gradient" style="background:linear-gradient(to right,#e5f0ff 0%,#9cc0f8 25%,#5c91ee 50%,#2f6fe4 75%,#0b3b8c 100%);"></div>
-      <div class="legend-labels"><span>Low</span><span>High</span></div>
-    `;
-    return;
-  }
-
-  if (solarVisible) {
-    div.innerHTML = `
-      <div class="legend-title">Solar Density</div>
-      <div class="legend-gradient" style="background:linear-gradient(to right,#fff8e1 0%,#ffe7a3 16%,#ffc66d 32%,#ff9c51 48%,#f06a3d 64%,#d9432f 78%,#b51f1f 90%,#7f0000 100%);"></div>
-      <div class="legend-labels"><span>Low</span><span>High</span></div>
-    `;
-    return;
-  }
-
-  div.innerHTML = `
-    <div class="legend-title">Map View</div>
-    <div class="legend-note">Turn on a layer from the control panel.</div>
-  `;
-}
-
 function wireToggle(id, onEnable, onDisable) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -605,7 +585,7 @@ function wireToggle(id, onEnable, onDisable) {
       }
       keepVisualOrder();
       setActiveViewLabel();
-      updateLegend();
+      updateEmbeddedLegend();
       updateAnalysisPanel();
     } catch (err) {
       console.error(err);
@@ -638,7 +618,7 @@ async function enableBoundary() {
   else if (!map.hasLayer(boundaryLayer)) boundaryLayer.addTo(map);
   keepVisualOrder();
   setActiveViewLabel();
-  updateLegend();
+  updateEmbeddedLegend();
   updateAnalysisPanel();
 }
 
@@ -647,7 +627,7 @@ function disableBoundary() {
     map.removeLayer(boundaryLayer);
   }
   setActiveViewLabel();
-  updateLegend();
+  updateEmbeddedLegend();
   updateAnalysisPanel();
 }
 
@@ -684,7 +664,7 @@ async function initializeDashboard() {
 
   keepVisualOrder();
   setActiveViewLabel();
-  updateLegend();
+  updateEmbeddedLegend();
   updateAnalysisPanel();
 }
 
